@@ -79,8 +79,11 @@ var xMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);;
 //   return xMatrix;
 // }
 
-function rotation(axis,deg) {
+function rotation(axis,deg, useDegree) {
   var tmpRotation;
+  if (useDegree) {
+    deg = (deg*Math.PI)/180;
+  }
   a = Math.cos(deg);
   b = Math.sin(deg);
   if (axis === 1) {  // rotate x
@@ -198,8 +201,10 @@ var uniform_scaleHead = scale(3,3,3);
 headGeometry.applyMatrix(uniform_scaleHead);
 
 var tailGeometry = makeCube();
+var rotation_tail = rotation(1,-10, true);
 var non_uniform_scaleTail = scale(1,1,10); 
 tailGeometry.applyMatrix(non_uniform_scaleTail);
+tailGeometry.applyMatrix(rotation_tail);
 
 var noseGeometry = makeCube();
 var uniform_scaleNose = scale(1.5,1.5,1.5);
@@ -207,19 +212,24 @@ noseGeometry.applyMatrix(uniform_scaleNose);
 
 var frontLegGeometry = makeCube();
 var non_uniform_scaleFL = scale(2.5,1,3);
+var rotation_Legs = rotation(1,15, true);
 frontLegGeometry.applyMatrix(non_uniform_scaleFL);
+frontLegGeometry.applyMatrix(rotation_Legs);
 
 var backLegGeometry = makeCube();
 var non_uniform_scaleBL = scale(2,1,2.5);
 backLegGeometry.applyMatrix(non_uniform_scaleBL);
+backLegGeometry.applyMatrix(rotation_Legs);
 
 var clawGeometryLarge = makeCube();
 var non_unifromscaleFinger = scale(0.35,0.35, 1.5);
 clawGeometryLarge.applyMatrix(non_unifromscaleFinger);
+clawGeometryLarge.applyMatrix(rotation_Legs);
 
 var clawGeometrySmall = makeCube();
 var non_unifromscaleFinger = scale(0.2,0.2, 1);
 clawGeometrySmall.applyMatrix(non_unifromscaleFinger);
+clawGeometrySmall.applyMatrix(rotation_Legs);
 
 // MATRICES
 
@@ -240,19 +250,19 @@ clawGeometrySmall.applyMatrix(non_unifromscaleFinger);
 var torsoMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
 var headMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
 var tailMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-5.4, 0,0,0,1);
-var frontLegLMatrix = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-3, 0,0,1,3.75, 0,0,0,1);
-var frontLegRMatrix = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-3, 0,0,1,3.75, 0,0,0,1);
-var backLegLMatrix = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-3, 0,0,1,-2.5, 0,0,0,1);
-var backLegRMatrix = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-3, 0,0,1,-2.5, 0,0,0,1);
+var frontLegLMatrix = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
+var frontLegRMatrix = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
+var backLegLMatrix = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
+var backLegRMatrix = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
 
 // nose
 var noseMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,2, 0,0,0,1);
 
 // claws
-var clawMatrixesFLArray = populateClawsMatrix(-1,0,1.8,0.5);
-var clawMatrixesFRArray = populateClawsMatrix(-1,0,1.8,0.5);
-var clawMatrixesBLArray = populateClawsMatrix(-0.8,0,1.5,0.4);
-var clawMatrixesBRArray = populateClawsMatrix(-0.8,0,1.5,0.4);
+var clawMatrixesFLArray = populateClawsMatrix(-1,-0.5,1.8,0.5);
+var clawMatrixesFRArray = populateClawsMatrix(-1,-0.5,1.8,0.5);
+var clawMatrixesBLArray = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
+var clawMatrixesBRArray = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
 
 // TO-DO: PUT TOGETHER THE REST OF YOUR STAR-NOSED MOLE AND ADD TO THE SCENE!
 // Hint: Hint: Add one piece of geometry at a time, then implement the motion for that part. 
@@ -354,7 +364,7 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame 
-        var rotateZ = rotation(1,-p);
+        var rotateZ = rotation(1,-p, false);
         var torsoMatrixR = mulMatrix(torsoMatrix, rotateZ);
         applyEffect(torsoMatrixR);
       break;
@@ -369,7 +379,7 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame 
-        var rotateZ = rotation(1,p);
+        var rotateZ = rotation(1,p, false);
         var torsoMatrixR = mulMatrix(torsoMatrix, rotateZ);
         applyEffect(torsoMatrixR);
       break;
