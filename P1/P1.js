@@ -62,22 +62,22 @@ var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 var matrixStack = [];
 var xMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);;
 
-function pushMatrix(matrix) {
-  if (matrix) {
-    matrixStack.push(matrix.clone());
-    xMatrix = matrix.clone();
-  } else {
-    matrixStack.push(xMatrix.clone());
-  }
-}
+// function pushMatrix(matrix) {
+//   if (matrix) {
+//     matrixStack.push(matrix.clone());
+//     xMatrix = matrix.clone();
+//   } else {
+//     matrixStack.push(xMatrix.clone());
+//   }
+// }
 
-function popMatrix() {
-  if (!matrixStack.length) {
-    throw("Can't pop from an empty matrix stack.");
-  }
-  xMatrix = matrixStack.pop();
-  return xMatrix;
-}
+// function popMatrix() {
+//   if (!matrixStack.length) {
+//     throw("Can't pop from an empty matrix stack.");
+//   }
+//   xMatrix = matrixStack.pop();
+//   return xMatrix;
+// }
 
 function rotation(axis,deg) {
   var tmpRotation;
@@ -108,14 +108,61 @@ function mulMatrix(matrix,app) {
 }
 
 function applyEffect(torsoMatrixApplied) {
+      var headMatrixREL = mulMatrix(torsoMatrixApplied, headMatrix);
+      var tailMatrixREL = mulMatrix(torsoMatrixApplied, tailMatrix);
+      var noseMatrixREL = mulMatrix(torsoMatrixApplied, noseMatrix);
+      var frontLegLMatrixREL = mulMatrix(torsoMatrixApplied, frontLegLMatrix);
+      var frontLegRMatrixREL = mulMatrix(torsoMatrixApplied, frontLegRMatrix);
+      var backLegLMatrixREL = mulMatrix(torsoMatrixApplied, backLegLMatrix);
+      var backLegRMatrixREL = mulMatrix(torsoMatrixApplied, backLegRMatrix);
+
       torso.setMatrix(torsoMatrixApplied); 
-      head.setMatrix(mulMatrix(torsoMatrixApplied, headMatrix));
-      tail.setMatrix(mulMatrix(torsoMatrixApplied, tailMatrix));
-      nose.setMatrix(mulMatrix(torsoMatrixApplied, noseMatrix));
-      frontLegL.setMatrix(mulMatrix(torsoMatrixApplied, frontLegLMatrix));
-      frontLegR.setMatrix(mulMatrix(torsoMatrixApplied, frontLegRMatrix));
-      backLegL.setMatrix(mulMatrix(torsoMatrixApplied, backLegLMatrix));
-      backLegR.setMatrix(mulMatrix(torsoMatrixApplied, backLegRMatrix));
+      head.setMatrix(headMatrixREL);
+      tail.setMatrix(tailMatrixREL);
+      nose.setMatrix(noseMatrixREL);
+      frontLegL.setMatrix(frontLegLMatrixREL);
+      frontLegR.setMatrix(frontLegRMatrixREL);
+      backLegL.setMatrix(backLegLMatrixREL);
+      backLegR.setMatrix(backLegRMatrixREL);
+
+      setClawMatrix(frontClawsL, clawMatrixesFLArray, frontLegLMatrixREL);
+      setClawMatrix(frontClawsR, clawMatrixesFRArray, frontLegRMatrixREL);
+      setClawMatrix(backClawsL, clawMatrixesBLArray, backLegLMatrixREL);
+      setClawMatrix(backClawsR, clawMatrixesBRArray, backLegRMatrixREL);
+}
+
+function populateClawsMatrix(startX, fixedY, fixedZ, spacing) {
+  var claws = [];
+  claws.push(new THREE.Matrix4().set(1,0,0,startX, 0,1,0,fixedY, 0,0,1,fixedZ, 0,0,0,1));
+  claws.push(new THREE.Matrix4().set(1,0,0,startX+spacing, 0,1,0,fixedY, 0,0,1,fixedZ, 0,0,0,1));
+  claws.push(new THREE.Matrix4().set(1,0,0,startX+spacing*2, 0,1,0,fixedY, 0,0,1,fixedZ, 0,0,0,1));
+  claws.push(new THREE.Matrix4().set(1,0,0,startX+spacing*3, 0,1,0,fixedY, 0,0,1,fixedZ, 0,0,0,1));
+  claws.push(new THREE.Matrix4().set(1,0,0,startX+spacing*4, 0,1,0,fixedY, 0,0,1,fixedZ, 0,0,0,1));
+  return claws;
+}
+
+function populateClaw(clawGeo) {
+  var claws = [];
+  for (i=0; i<5; i++) {
+    claws.push(new THREE.Mesh(clawGeo,normalMaterial));
+  }
+  return claws;
+}
+
+function setClawMatrix(listofClaws, listofClawMatrix, relativeTo){
+  if (listofClaws && listofClawMatrix && relativeTo) {
+    for (i = 0; i < 5; i++) {
+      listofClaws[i].setMatrix(mulMatrix(relativeTo,listofClawMatrix[i]));
+    }
+  }
+}
+
+function addClawsToScene(listofClaws) {
+   if (listofClaws) {
+    for (i = 0; i < 5; i++) {
+      scene.add(listofClaws[i]);
+    }
+   }
 }
 // ===================================================================================
 
@@ -166,9 +213,13 @@ var backLegGeometry = makeCube();
 var non_uniform_scaleBL = scale(2,1,2.5);
 backLegGeometry.applyMatrix(non_uniform_scaleBL);
 
-var fingerGeometry = makeCube();
-var non_unifromscaleFinger = scale(0.5,0.5,1.5);
-fingerGeometry.applyMatrix(non_unifromscaleFinger);
+var clawGeometryLarge = makeCube();
+var non_unifromscaleFinger = scale(0.35,0.35, 1.5);
+clawGeometryLarge.applyMatrix(non_unifromscaleFinger);
+
+var clawGeometrySmall = makeCube();
+var non_unifromscaleFinger = scale(0.2,0.2, 1);
+clawGeometrySmall.applyMatrix(non_unifromscaleFinger);
 
 // MATRICES
 
@@ -184,7 +235,7 @@ fingerGeometry.applyMatrix(non_unifromscaleFinger);
 //    head    tail   frontLegs    backLegs        nose
 
 // Main Body Part - MAIN BODY - RELATIVE TO TORSO
-var torsoMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,5.4, 0,0,1,0, 0,0,0,1);
+var torsoMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
 var headMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
 var tailMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-5.4, 0,0,0,1);
 var noseMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,7.5, 0,0,0,1);
@@ -193,6 +244,11 @@ var frontLegRMatrix = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-3, 0,0,1,3.75, 0,
 var backLegLMatrix = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-3, 0,0,1,-2.5, 0,0,0,1);
 var backLegRMatrix = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-3, 0,0,1,-2.5, 0,0,0,1);
 
+// extra details
+var clawMatrixesFLArray = populateClawsMatrix(-1,0,1.8,0.5);
+var clawMatrixesFRArray = populateClawsMatrix(-1,0,1.8,0.5);
+var clawMatrixesBLArray = populateClawsMatrix(-0.8,0,1.5,0.4);
+var clawMatrixesBRArray = populateClawsMatrix(-0.8,0,1.5,0.4);
 
 // TO-DO: PUT TOGETHER THE REST OF YOUR STAR-NOSED MOLE AND ADD TO THE SCENE!
 // Hint: Hint: Add one piece of geometry at a time, then implement the motion for that part. 
@@ -203,27 +259,42 @@ var torso = new THREE.Mesh(torsoGeometry,normalMaterial);
 torso.setMatrix(torsoMatrix);
 
 var head = new THREE.Mesh(headGeometry,normalMaterial);
-head.setMatrix(mulMatrix(torsoMatrix, headMatrix));
+var headMatrixMAIN = mulMatrix(torsoMatrix, headMatrix);
+head.setMatrix(headMatrixMAIN);
 
 var tail = new THREE.Mesh(tailGeometry,normalMaterial);
-tail.setMatrix(mulMatrix(torsoMatrix, tailMatrix));
+var tailMatrixMAIN = mulMatrix(torsoMatrix, tailMatrix);
+tail.setMatrix(tailMatrixMAIN);
 
 var nose = new THREE.Mesh(noseGeometry,normalMaterial);
-nose.setMatrix(mulMatrix(torsoMatrix, noseMatrix));
+var noseMatrixMAIN = mulMatrix(torsoMatrix, noseMatrix);
+nose.setMatrix(noseMatrixMAIN);
 
 var frontLegL = new THREE.Mesh(frontLegGeometry,normalMaterial);
-frontLegL.setMatrix(mulMatrix(torsoMatrix, frontLegLMatrix));
+var frontLegLMatrixMAIN = mulMatrix(torsoMatrix, frontLegLMatrix);
+frontLegL.setMatrix(frontLegLMatrixMAIN);
 
 var frontLegR = new THREE.Mesh(frontLegGeometry,normalMaterial);
-frontLegR.setMatrix(mulMatrix(torsoMatrix, frontLegRMatrix));
+var frontLegRMatrixMAIN = mulMatrix(torsoMatrix, frontLegRMatrix);
+frontLegR.setMatrix(frontLegRMatrixMAIN);
 
 var backLegL = new THREE.Mesh(backLegGeometry,normalMaterial);
-backLegL.setMatrix(mulMatrix(torsoMatrix,backLegLMatrix));
+var backLegLMatrixMAIN = mulMatrix(torsoMatrix,backLegLMatrix);
+backLegL.setMatrix(backLegLMatrixMAIN);
 
 var backLegR = new THREE.Mesh(backLegGeometry,normalMaterial);
-backLegR.setMatrix(mulMatrix(torsoMatrix,backLegRMatrix));
+var backLegRMatrixMAIN = mulMatrix(torsoMatrix,backLegRMatrix);
+backLegR.setMatrix(backLegRMatrixMAIN);
 
-
+// Front Left Limb
+var frontClawsL = populateClaw(clawGeometryLarge);
+setClawMatrix(frontClawsL, clawMatrixesFLArray, frontLegLMatrixMAIN);
+var frontClawsR = populateClaw(clawGeometryLarge);
+setClawMatrix(frontClawsR, clawMatrixesFRArray, frontLegRMatrixMAIN);
+var backClawsL = populateClaw(clawGeometrySmall);
+setClawMatrix(backClawsL, clawMatrixesBLArray, backLegLMatrixMAIN);
+var backClawsR = populateClaw(clawGeometrySmall);
+setClawMatrix(backClawsR, clawMatrixesBRArray, backLegRMatrixMAIN);
 
 // add to scene
 scene.add(torso);
@@ -234,6 +305,10 @@ scene.add(frontLegL);
 scene.add(frontLegR);
 scene.add(backLegL);
 scene.add(backLegR);
+addClawsToScene(frontClawsL);
+addClawsToScene(frontClawsR);
+addClawsToScene(backClawsL);
+addClawsToScene(backClawsR);
 
 // APPLY DIFFERENT JUMP CUTS/ANIMATIONS TO DIFFERNET KEYS
 // Note: The start of "U" animation has been done for you, you must implement the hiearchy and jumpcut.
@@ -269,7 +344,6 @@ function updateBody() {
   {
       case(key == "U" && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
-
         if (time > time_end){
           p = p1;
           animate = false;
@@ -285,7 +359,6 @@ function updateBody() {
       // Note: Remember spacebar sets jumpcut/animate!
       case (key == "D" && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
-
         if (time > time_end){
           p = p1;
           animate = false;
