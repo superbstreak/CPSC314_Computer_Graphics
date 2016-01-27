@@ -357,7 +357,7 @@ function updateBody() {
 
       // TO-DO: IMPLEMENT JUMPCUT/ANIMATION FOR EACH KEY!
       // Note: Remember spacebar sets jumpcut/animate!
-      case (key == "D" && animate):
+      case (key == "E" && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -396,8 +396,8 @@ keyboard.domElement.addEventListener('keydown',function(event){
   // TO-DO: BIND KEYS TO YOUR JUMP CUTS AND ANIMATIONS
   // Note: Remember spacebar sets jumpcut/animate! 
   // Hint: Look up "threex.keyboardstate by Jerome Tienne" for more info.
-  else if(keyboard.eventMatches(event,"D")){ 
-    (key == "D")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "D")} 
+  else if(keyboard.eventMatches(event,"E")){ 
+    (key == "E")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "E")} 
 
 
     });
