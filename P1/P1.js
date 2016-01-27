@@ -110,7 +110,7 @@ function mulMatrix(matrix,app) {
 function applyEffect(torsoMatrixApplied) {
       var headMatrixREL = mulMatrix(torsoMatrixApplied, headMatrix);
       var tailMatrixREL = mulMatrix(torsoMatrixApplied, tailMatrix);
-      var noseMatrixREL = mulMatrix(torsoMatrixApplied, noseMatrix);
+      var noseMatrixREL = mulMatrix(headMatrixREL, noseMatrix);
       var frontLegLMatrixREL = mulMatrix(torsoMatrixApplied, frontLegLMatrix);
       var frontLegRMatrixREL = mulMatrix(torsoMatrixApplied, frontLegRMatrix);
       var backLegLMatrixREL = mulMatrix(torsoMatrixApplied, backLegLMatrix);
@@ -231,20 +231,24 @@ clawGeometrySmall.applyMatrix(non_unifromscaleFinger);
 //           World
 //             |
 //           Torso
-//     |-------|------|-------------|--------------|
-//    head    tail   frontLegs    backLegs        nose
+//     |-------|------|-------------|
+//    head    tail   frontLegs    backLegs
+//     |                |           |
+//    nose          clawsLarge    clawsSmall
 
 // Main Body Part - MAIN BODY - RELATIVE TO TORSO
 var torsoMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
 var headMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
 var tailMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-5.4, 0,0,0,1);
-var noseMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,7.5, 0,0,0,1);
 var frontLegLMatrix = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-3, 0,0,1,3.75, 0,0,0,1);
 var frontLegRMatrix = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-3, 0,0,1,3.75, 0,0,0,1);
 var backLegLMatrix = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-3, 0,0,1,-2.5, 0,0,0,1);
 var backLegRMatrix = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-3, 0,0,1,-2.5, 0,0,0,1);
 
-// extra details
+// nose
+var noseMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,2, 0,0,0,1);
+
+// claws
 var clawMatrixesFLArray = populateClawsMatrix(-1,0,1.8,0.5);
 var clawMatrixesFRArray = populateClawsMatrix(-1,0,1.8,0.5);
 var clawMatrixesBLArray = populateClawsMatrix(-0.8,0,1.5,0.4);
@@ -267,7 +271,7 @@ var tailMatrixMAIN = mulMatrix(torsoMatrix, tailMatrix);
 tail.setMatrix(tailMatrixMAIN);
 
 var nose = new THREE.Mesh(noseGeometry,normalMaterial);
-var noseMatrixMAIN = mulMatrix(torsoMatrix, noseMatrix);
+var noseMatrixMAIN = mulMatrix(headMatrixMAIN, noseMatrix);
 nose.setMatrix(noseMatrixMAIN);
 
 var frontLegL = new THREE.Mesh(frontLegGeometry,normalMaterial);
@@ -391,14 +395,13 @@ keyboard.domElement.addEventListener('keydown',function(event){
     camera.position.set(45,0,0);
     camera.lookAt(scene.position);}
   else if(keyboard.eventMatches(event,"U")){ 
-    (key == "U")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "U")}  
+    (key == "U")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "U");}  
 
   // TO-DO: BIND KEYS TO YOUR JUMP CUTS AND ANIMATIONS
   // Note: Remember spacebar sets jumpcut/animate! 
   // Hint: Look up "threex.keyboardstate by Jerome Tienne" for more info.
   else if(keyboard.eventMatches(event,"E")){ 
-    (key == "E")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "E")} 
-
+    (key == "E")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "E");} 
 
     });
 
