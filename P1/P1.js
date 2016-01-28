@@ -507,8 +507,10 @@ function updateBody() {
 
         setTentMatrix(tentL, tentMatrixLArray, noseMatrixREL);
         setTentMatrix(tentR, tentMatrixRArray, noseMatrixREL);
-        tentSmallL.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallL));
-        tentSmallR.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallR));
+        tentSmallLU.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallLU));
+        tentSmallLD.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallLD));
+        tentSmallRU.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallRU));
+        tentSmallRD.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallRD));
       break;
       case ((key == "T" || key == "V") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -535,19 +537,6 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-
-        var tentL = populateLargeTentGeo(tentLAngleX,tentLAngleY);
-        setTentMatrix(tentL,tentMatrixLArray,noseMatrixMAIN);
-        var tentSmallL = new THREE.Mesh(tentGeometrySmall,normalMaterial);
-        var tentSmallLNose = mulMatrix(noseMatrixMAIN, tentMatrixSmallL);
-        tentSmallL.setMatrix(tentSmallLNose);
-
-        // Right Tenticals
-        var tentR = populateLargeTentGeo(tentRAngleX,tentRAngleY);
-        setTentMatrix(tentR,tentMatrixRArray,noseMatrixMAIN);
-        var tentSmallR = new THREE.Mesh(tentGeometrySmall,normalMaterial);
-        var tentSmallRNose = mulMatrix(noseMatrixMAIN, tentMatrixSmallR);
-        tentSmallR.setMatrix(tentSmallRNose);
       break;
     default:
       break;
