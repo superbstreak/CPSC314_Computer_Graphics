@@ -57,37 +57,136 @@ var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 //   YOUR WORK STARTS BELOW    //
 /////////////////////////////////
 
-// ===================================================================================
-// custom generic ops 
+// MATERIALS
+// Note: Feel free to be creative with this! 
+var normalMaterial = new THREE.MeshNormalMaterial();
+
+// function drawCube()
+// Draws a unit cube centered about the origin.
+// Note: You will be using this for all of your geometry
+function makeCube() {
+  var unitCube = new THREE.BoxGeometry(1,1,1);
+  return unitCube;
+}
+
+// ===============================================================================
+// ===============================================================================
+// Variables
+// ===============================================================================
+
 var numberOfTentical = 9;
-var matrixStack = [];
-var xMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);
-var headMatrixREL;
-var tailMatrixREL;
-var noseMatrixREL;
-var frontLegLMatrixREL;
-var frontLegRMatrixREL;
-var backLegLMatrixREL;
-var backLegRMatrixREL;
-var tentSmallLREL;
-var tentSmallRREL;
+var numberOfClaws = 5;
+var tentLAngleX = [-40,-30,-20,-10,0,10,20,30,40];
+var tentLAngleY = [0,10,20,30,40,30,20,10,0];
+var tentRAngleX = [40,30,20,10,0,-10,-20,-30,-40];
+var tentRAngleY = [0,-10,-20,-30,-40,-30,-20,-10,0];
 
-// function pushMatrix(matrix) {
-//   if (matrix) {
-//     matrixStack.push(matrix.clone());
-//     xMatrix = matrix.clone();
-//   } else {
-//     matrixStack.push(xMatrix.clone());
-//   }
-// }
+var xmatrixTorso = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
+var xmatrixHead = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
+var xmatrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-7, 0,0,0,1);
+var xmatrixFrontLegLeft = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
+var xmatrixFrontLegRight = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
+var xmatrixBackLegLeft = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
+var xmatrixBackLegRight = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
+var xmatrixNose = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,2, 0,0,0,1);
+var xmatrixClawFrontLeft = populateClawsMatrix(-1,-0.5,1.8,0.5);
+var xmatrixClawFrontRight = populateClawsMatrix(-1,-0.5,1.8,0.5);
+var xmatrixClawBackLeft = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
+var xmatrixClawBackRight = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
+var xmatrixTentLeft = populateTentMatrix(0.75,0.75,1);
+var xmatrixTentRight = populateTentMatrix(-0.75,-0.75,1);
+var xmatrixTentSmallLeftUpper = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
+var xmatrixTentSmallLeftLower = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
+var xmatrixTentSmallRightUpper = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
+var xmatrixTentSmallRightLower = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
 
-// function popMatrix() {
-//   if (!matrixStack.length) {
-//     throw("Can't pop from an empty matrix stack.");
-//   }
-//   xMatrix = matrixStack.pop();
-//   return xMatrix;
-// }
+// ===============================================================================
+// Geometry
+// ===============================================================================
+
+var geometryTorso = makeCube();
+var geometryHead = makeCube();
+var geometryTail = makeCube();
+var geometryNose = makeCube();
+var geometryFrontLeg = makeCube();
+var geometryBackLeg = makeCube();
+var geometryClawLarge = makeCube();
+var geometryClawSmall = makeCube();
+var geometryTentLarge  = makeCube();
+var geometryTentSmall = makeCube();
+
+var scaleTorso = scale(5,5,8);
+var scaleHead = scale(3,3,3);
+var rotationTail = rotation(1,-5, true);
+var scaleTail = scale(0.75,0.75,7.5); 
+var scaleNose = scale(1.5,1.5,1.5);
+var scaleFrontLeg = scale(2.5,1,3);
+var rotationLegs = rotation(1,15, true);
+var scaleBackLeg = scale(2,1,2.5);
+var scaleFingerLarge = scale(0.35,0.35, 1.5);
+var scaleFingerSmall = scale(0.2,0.2, 1);
+var scaleTentLarge = scale(0.25,0.25,1.5);
+var scaleTentSmall = scale(0.25,0.25,1.5);
+
+geometryTorso.applyMatrix(scaleTorso);
+geometryHead.applyMatrix(scaleHead);
+geometryTail.applyMatrix(scaleTail);
+geometryTail.applyMatrix(rotationTail);
+geometryNose.applyMatrix(scaleNose);
+geometryFrontLeg.applyMatrix(scaleFrontLeg);
+geometryFrontLeg.applyMatrix(rotationLegs);
+geometryBackLeg.applyMatrix(scaleBackLeg);
+geometryBackLeg.applyMatrix(rotationLegs);
+geometryClawLarge.applyMatrix(scaleFingerLarge);
+geometryClawLarge.applyMatrix(rotationLegs);
+geometryClawSmall.applyMatrix(scaleFingerSmall);
+geometryClawSmall.applyMatrix(rotationLegs);
+geometryTentLarge.applyMatrix(scaleTentLarge);
+geometryTentSmall.applyMatrix(scaleTentSmall);
+
+// ===============================================================================
+// Matrix 
+//           World
+//             |
+//           Torso
+//     |-------|------|-------------|
+//    head    tail   frontLegs    backLegs
+//     |                |           |
+//    nose          clawsLarge    clawsSmall
+//     |
+//  |---------------|----------|----------------|
+// leftTent     RightTent     SamllTentR     LargeTentL
+// ===============================================================================
+
+// Main Body Part - MAIN BODY - RELATIVE TO TORSO
+var matrixTorso = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
+var matrixHead = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
+var matrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-7, 0,0,0,1);
+var matrixFrontLegLeft = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
+var matrixFrontLegRight = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
+var matrixBackLegLeft = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
+var matrixBackLegRight = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
+
+// nose - RELATIVE TO HEAD
+var matrixNose = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,2, 0,0,0,1);
+
+// claws - RELATIVE TO PAW
+var matrixClawFrontLeft = populateClawsMatrix(-1,-0.5,1.8,0.5);
+var matrixClawFrontRight = populateClawsMatrix(-1,-0.5,1.8,0.5);
+var matrixClawBackLeft = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
+var matrixClawBackRight = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
+
+// tenticals - RELATIVE TO NOSE
+var matrixTentLeft = populateTentMatrix(0.75,0.75,1);
+var matrixTentRight = populateTentMatrix(-0.75,-0.75,1);
+var matrixTentSmallLeftUpper = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
+var matrixTentSmallLeftLower = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
+var matrixTentSmallRightUpper = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
+var matrixTentSmallRightLower = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
+
+// ===============================================================================
+// Custom Functions
+// ===============================================================================
 
 function rotation(axis,deg, useDegree) {
   var tmpRotation;
@@ -120,77 +219,34 @@ function mulMatrix(matrix,app) {
   return new THREE.Matrix4().multiplyMatrices(matrix,app);
 }
 
-function applyEffect(torsoMatrixApplied) {
-      headMatrixREL = mulMatrix(torsoMatrixApplied, headMatrix);
-      tailMatrixREL = mulMatrix(torsoMatrixApplied, tailMatrix);
-      noseMatrixREL = mulMatrix(headMatrixREL, noseMatrix);
-      frontLegLMatrixREL = mulMatrix(torsoMatrixApplied, frontLegLMatrix);
-      frontLegRMatrixREL = mulMatrix(torsoMatrixApplied, frontLegRMatrix);
-      backLegLMatrixREL = mulMatrix(torsoMatrixApplied, backLegLMatrix);
-      backLegRMatrixREL = mulMatrix(torsoMatrixApplied, backLegRMatrix);
-      tentSmallLUREL = mulMatrix(noseMatrixREL, tentMatrixSmallLU);
-      tentSmallLDREL = mulMatrix(noseMatrixREL, tentMatrixSmallLD);
-      tentSmallRUREL = mulMatrix(noseMatrixREL, tentMatrixSmallRU);
-      tentSmallRDREL = mulMatrix(noseMatrixREL, tentMatrixSmallRD);
 
-      torso.setMatrix(torsoMatrixApplied); 
-      head.setMatrix(headMatrixREL);
-      tail.setMatrix(tailMatrixREL);
-      nose.setMatrix(noseMatrixREL);
-      frontLegL.setMatrix(frontLegLMatrixREL);
-      frontLegR.setMatrix(frontLegRMatrixREL);
-      backLegL.setMatrix(backLegLMatrixREL);
-      backLegR.setMatrix(backLegRMatrixREL);
-
-      setClawMatrix(frontClawsL, clawMatrixesFLArray, frontLegLMatrixREL);
-      setClawMatrix(frontClawsR, clawMatrixesFRArray, frontLegRMatrixREL);
-      setClawMatrix(backClawsL, clawMatrixesBLArray, backLegLMatrixREL);
-      setClawMatrix(backClawsR, clawMatrixesBRArray, backLegRMatrixREL);
-      setTentMatrix(tentL, tentMatrixLArray, noseMatrixREL);
-      setTentMatrix(tentR, tentMatrixRArray, noseMatrixREL);
-      tentSmallLU.setMatrix(tentSmallLUREL);
-      tentSmallLD.setMatrix(tentSmallLDREL);
-      tentSmallRU.setMatrix(tentSmallRUREL);
-      tentSmallRD.setMatrix(tentSmallRDREL);
-}
-
+// matrix population
 function populateClawsMatrix(startX, fixedY, fixedZ, spacing) {
   var claws = [];
-  for (i=0; i<5; i++) {
+  for (i=0; i<numberOfClaws; i++) {
     claws.push(new THREE.Matrix4().set(1,0,0,startX+spacing*i, 0,1,0,fixedY, 0,0,1,fixedZ, 0,0,0,1));
   }
   return claws;
 }
 
-function populateClaw(clawGeo) {
-  var claws = [];
-  for (i=0; i<5; i++) {
-    claws.push(new THREE.Mesh(clawGeo,normalMaterial));
+function populateTentMatrix(x,y,z) {
+  var tenticals = [];
+  for (i = 0; i < numberOfTentical; i++) {
+    var angle = (180/numberOfTentical)*(i+1); // 180/9
+    var yspacing = Math.cos(angle*Math.PI/180);
+    var xspacing = Math.sin(angle*Math.PI/180);;
+    tenticals.push(new THREE.Matrix4().set(1,0,0,x*xspacing, 0,1,0,y*yspacing, 0,0,1,z, 0,0,0,1));
   }
-  return claws;
+  return tenticals;
 }
 
-function setClawMatrix(listofClaws, listofClawMatrix, relativeTo){
-  if (listofClaws && listofClawMatrix && relativeTo) {
-    for (i = 0; i < 5; i++) {
-      listofClaws[i].setMatrix(mulMatrix(relativeTo,listofClawMatrix[i]));
-    }
-  }
-}
 
-function addClawsToScene(listofClaws) {
-   if (listofClaws) {
-    for (i = 0; i < 5; i++) {
-      scene.add(listofClaws[i]);
-    }
-   }
-}
-
-function populateLargeTentGeo(angleX, angleY) {
+// Geometry population
+function populateLargeTentGeometry(angleX, angleY) {
   var tenticals = [];
   for (i = 0; i < numberOfTentical; i++) {
     var thisTent  = makeCube();
-    thisTent.applyMatrix(non_uniform_scaleTentLarge);
+    thisTent.applyMatrix(scaleTentLarge);
     thisTent.applyMatrix(rotation(1,angleX[i],true));
     thisTent.applyMatrix(rotation(2,angleY[i],true));
     var tent = new THREE.Mesh(thisTent,normalMaterial);
@@ -199,239 +255,152 @@ function populateLargeTentGeo(angleX, angleY) {
   return tenticals;
 }
 
-function populateTentMatrix(x,y,z) {
-  var tenticals = [];
-  for (i = 0; i < numberOfTentical; i++) {
-    var angle = (20)*(i+1); // 180/9
-    var yspacing = Math.cos(angle*Math.PI/180);
-    var xspacing = Math.sin(angle*Math.PI/180);;
-    tenticals.push(new THREE.Matrix4().set(1,0,0,x*xspacing, 0,1,0,y*yspacing, 0,0,1,z, 0,0,0,1));
+function populateClaw(clawGeo) {
+  var claws = [];
+  for (i=0; i<numberOfClaws; i++) {
+    claws.push(new THREE.Mesh(clawGeo,normalMaterial));
   }
-  return tenticals;
+  return claws;
 }
 
-function setTentMatrix(tenticals, tentMatrixArray, relativeTo) {
-  for (i = 0; i<numberOfTentical; i++) {
-    tenticals[i].setMatrix(mulMatrix(relativeTo,tentMatrixArray[i]));
+// set matrix
+function setToRELMatrix(bodyPart, matrix, relativeTo, length) {
+  for (i = 0; i<length; i++) {
+    bodyPart[i].setMatrix(mulMatrix(relativeTo,matrix[i]));
   }
 }
 
-function addTentToScene(tents) {
-  for (i = 0; i<numberOfTentical; i++) {
-    scene.add(tents[i]);
-  }
-}
-// ===================================================================================
-
-
-// MATERIALS
-// Note: Feel free to be creative with this! 
-
-var normalMaterial = new THREE.MeshNormalMaterial();
-
-
-
-// function drawCube()
-// Draws a unit cube centered about the origin.
-// Note: You will be using this for all of your geometry
-function makeCube() {
-  var unitCube = new THREE.BoxGeometry(1,1,1);
-  return unitCube;
+// add list to scene
+function addListToScene(list) {
+   if (list) {
+    var len = list.length;
+    for (i = 0; i < len; i++) {
+      scene.add(list[i]);
+    }
+   }
 }
 
-// GEOMETRY
-var torsoGeometry = makeCube();
-var non_uniform_scale = scale(5,5,8); //new THREE.Matrix4().set(5,0,0,0, 0,5,0,0, 0,0,8,0, 0,0,0,1);
-torsoGeometry.applyMatrix(non_uniform_scale)
+function addToScene() {
+  scene.add(torso);
+  scene.add(head);
+  scene.add(tail);
+  scene.add(nose);
+  scene.add(frontLegL);
+  scene.add(frontLegR);
+  scene.add(backLegL);
+  scene.add(backLegR);
+  addListToScene(frontClawsL);
+  addListToScene(frontClawsR);
+  addListToScene(backClawsL);
+  addListToScene(backClawsR);
+  addListToScene(tentL);
+  addListToScene(tentR);
+  scene.add(tentSmallLU);
+  scene.add(tentSmallLD);
+  scene.add(tentSmallRU);
+  scene.add(tentSmallRD);
+}
 
-// TO-DO: SPECIFY THE REST OF YOUR STAR-NOSE MOLE'S GEOMETRY. 
-// Note: You will be using transformation matrices to set the shape. 
-// Note: You are not allowed to use the tools Three.js provides for 
-//       rotation, translation and scaling.
-// Note: The torso has been done for you (but feel free to modify it!)  
-// Hint: Explicity declare new matrices using Matrix4().set     
-var headGeometry = makeCube();
-var uniform_scaleHead = scale(3,3,3);
-headGeometry.applyMatrix(uniform_scaleHead);
+function drawMole() {
+  var xmatrixHeadREL = mulMatrix(xmatrixTorso, xmatrixHead);
+  var xmatrixTailREL = mulMatrix(xmatrixTorso, xmatrixTail);
+  var xmatrixNoseREL = mulMatrix(xmatrixHeadREL, xmatrixNose);
+  var xmatrixFrontLegLeftREL = mulMatrix(xmatrixTorso, matrixFrontLegLeft);
+  var xmatrixFrontLegRightREL = mulMatrix(xmatrixTorso, matrixFrontLegRight);
+  var xmatrixBackLegLeftREL = mulMatrix(xmatrixTorso,matrixBackLegLeft);
+  var xmatrixBackLegRightREL = mulMatrix(xmatrixTorso,matrixBackLegRight);
 
-var tailGeometry = makeCube();
-var rotation_tail = rotation(1,-5, true);
-var non_uniform_scaleTail = scale(0.75,0.75,7.5); 
-tailGeometry.applyMatrix(non_uniform_scaleTail);
-tailGeometry.applyMatrix(rotation_tail);
+  torso.setMatrix(xmatrixTorso);
+  head.setMatrix(xmatrixHeadREL);
+  tail.setMatrix(xmatrixTailREL);
+  nose.setMatrix(xmatrixNoseREL);
+  frontLegL.setMatrix(xmatrixFrontLegLeftREL);
+  frontLegR.setMatrix(xmatrixFrontLegRightREL);
+  backLegL.setMatrix(xmatrixBackLegLeftREL);
+  backLegR.setMatrix(xmatrixBackLegRightREL);
 
-var noseGeometry = makeCube();
-var uniform_scaleNose = scale(1.5,1.5,1.5);
-noseGeometry.applyMatrix(uniform_scaleNose);
+  setToRELMatrix(frontClawsL, matrixClawFrontLeft, xmatrixFrontLegLeftREL, numberOfClaws);
+  setToRELMatrix(frontClawsR, matrixClawFrontRight, xmatrixFrontLegRightREL, numberOfClaws);
+  setToRELMatrix(backClawsL, matrixClawBackLeft, xmatrixBackLegLeftREL, numberOfClaws);
+  setToRELMatrix(backClawsR, matrixClawBackRight, xmatrixBackLegRightREL, numberOfClaws);
 
-var frontLegGeometry = makeCube();
-var non_uniform_scaleFL = scale(2.5,1,3);
-var rotation_Legs = rotation(1,15, true);
-frontLegGeometry.applyMatrix(non_uniform_scaleFL);
-frontLegGeometry.applyMatrix(rotation_Legs);
+  setToRELMatrix(tentL,xmatrixTentLeft,xmatrixNoseREL,numberOfTentical);
+  setToRELMatrix(tentR,xmatrixTentRight,xmatrixNoseREL,numberOfTentical);
 
-var backLegGeometry = makeCube();
-var non_uniform_scaleBL = scale(2,1,2.5);
-backLegGeometry.applyMatrix(non_uniform_scaleBL);
-backLegGeometry.applyMatrix(rotation_Legs);
+  var xmatrixTentSmallLeftUpperREL = mulMatrix(xmatrixNoseREL, xmatrixTentSmallLeftUpper);
+  var xmatrixTentSmallLeftLowerREL = mulMatrix(xmatrixNoseREL, xmatrixTentSmallLeftLower);
+  tentSmallLU.setMatrix(xmatrixTentSmallLeftUpperREL);
+  tentSmallLD.setMatrix(xmatrixTentSmallLeftLowerREL);
 
-var clawGeometryLarge = makeCube();
-var non_unifromscaleFingerLarge = scale(0.35,0.35, 1.5);
-clawGeometryLarge.applyMatrix(non_unifromscaleFingerLarge);
-clawGeometryLarge.applyMatrix(rotation_Legs);
+  var xmatrixTentSmallRightUpperREL = mulMatrix(xmatrixNoseREL, xmatrixTentSmallRightUpper);
+  var xmatrixTentSmallRightLowerREL = mulMatrix(xmatrixNoseREL, xmatrixTentSmallRightLower);
+  tentSmallRU.setMatrix(xmatrixTentSmallRightUpperREL);
+  tentSmallRD.setMatrix(xmatrixTentSmallRightLowerREL);
+}
 
-var clawGeometrySmall = makeCube();
-var non_unifromscaleFingerSmall = scale(0.2,0.2, 1);
-clawGeometrySmall.applyMatrix(non_unifromscaleFingerSmall);
-clawGeometrySmall.applyMatrix(rotation_Legs);
+// ===============================================================================       
 
-var tentGeometryLarge  = makeCube();
-var non_uniform_scaleTentLarge = scale(0.25,0.25,1.5);
-tentGeometryLarge.applyMatrix(non_uniform_scaleTentLarge);
+// CREATE BODY
+var torso = new THREE.Mesh(geometryTorso,normalMaterial);
+var head = new THREE.Mesh(geometryHead,normalMaterial);
+var tail = new THREE.Mesh(geometryTail,normalMaterial);
+var nose = new THREE.Mesh(geometryNose,normalMaterial);
+var frontLegL = new THREE.Mesh(geometryFrontLeg,normalMaterial);
+var frontLegR = new THREE.Mesh(geometryFrontLeg,normalMaterial);
+var backLegL = new THREE.Mesh(geometryBackLeg,normalMaterial);
+var backLegR = new THREE.Mesh(geometryBackLeg,normalMaterial);
+var frontClawsL = populateClaw(geometryClawLarge);
+var frontClawsR = populateClaw(geometryClawLarge);
+var backClawsL = populateClaw(geometryClawSmall);
+var backClawsR = populateClaw(geometryClawSmall);
+var tentL = populateLargeTentGeometry(tentLAngleX,tentLAngleY);
+var tentR = populateLargeTentGeometry(tentRAngleX,tentRAngleY);
+var tentSmallLU = new THREE.Mesh(geometryTentSmall,normalMaterial);
+var tentSmallLD = new THREE.Mesh(geometryTentSmall,normalMaterial);
+var tentSmallRU = new THREE.Mesh(geometryTentSmall,normalMaterial);
+var tentSmallRD = new THREE.Mesh(geometryTentSmall,normalMaterial);
 
-var tentGeometrySmall = makeCube();
-var non_uniform_scaleTentSmall = scale(0.15,0.15,1.5);
-tentGeometrySmall.applyMatrix(non_uniform_scaleTentSmall);
+var matrixHeadREL = mulMatrix(matrixTorso, matrixHead);
+var matrixTailREL = mulMatrix(matrixTorso, matrixTail);
+var matrixNoseREL = mulMatrix(matrixHeadREL, matrixNose);
+var matrixFrontLegLeftREL = mulMatrix(matrixTorso, matrixFrontLegLeft);
+var matrixFrontLegRightREL = mulMatrix(matrixTorso, matrixFrontLegRight);
+var matrixBackLegLeftREL = mulMatrix(matrixTorso,matrixBackLegLeft);
+var matrixBackLegRightREL = mulMatrix(matrixTorso,matrixBackLegRight);
 
-// MATRICES
+torso.setMatrix(matrixTorso);
+head.setMatrix(matrixHeadREL);
+tail.setMatrix(matrixTailREL);
+nose.setMatrix(matrixNoseREL);
+frontLegL.setMatrix(matrixFrontLegLeftREL);
+frontLegR.setMatrix(matrixFrontLegRightREL);
+backLegL.setMatrix(matrixBackLegLeftREL);
+backLegR.setMatrix(matrixBackLegRightREL);
 
-// TO-DO: INITIALIZE THE REST OF YOUR MATRICES 
-// Note: Use of parent attribute is not allowed.
-// Hint: Keep hierarchies in mind!   
-// Hint: Play around with the headTorsoMatrix values, what changes in the render? Why?         
+setToRELMatrix(frontClawsL, matrixClawFrontLeft, matrixFrontLegLeftREL, numberOfClaws);
+setToRELMatrix(frontClawsR, matrixClawFrontRight, matrixFrontLegRightREL, numberOfClaws);
+setToRELMatrix(backClawsL, matrixClawBackLeft, matrixBackLegLeftREL, numberOfClaws);
+setToRELMatrix(backClawsR, matrixClawBackRight, matrixBackLegRightREL, numberOfClaws);
 
-//           World
-//             |
-//           Torso
-//     |-------|------|-------------|
-//    head    tail   frontLegs    backLegs
-//     |                |           |
-//    nose          clawsLarge    clawsSmall
-//     |
-//  |---------------|----------|----------------|
-// leftTent     RightTent     SamllTentR     LargeTentL
+setToRELMatrix(tentL,matrixTentLeft,matrixNoseREL,numberOfTentical);
+setToRELMatrix(tentR,matrixTentRight,matrixNoseREL,numberOfTentical);
 
-// Main Body Part - MAIN BODY - RELATIVE TO TORSO
-var torsoMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
-var headMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
-var tailMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-7, 0,0,0,1);
-var frontLegLMatrix = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
-var frontLegRMatrix = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
-var backLegLMatrix = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
-var backLegRMatrix = new THREE.Matrix4().set(1,0,0,-2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
+var matrixTentSmallLeftUpperREL = mulMatrix(matrixNoseREL, matrixTentSmallLeftUpper);
+var matrixTentSmallLeftLowerREL = mulMatrix(matrixNoseREL, matrixTentSmallLeftLower);
+tentSmallLU.setMatrix(matrixTentSmallLeftUpperREL);
+tentSmallLD.setMatrix(matrixTentSmallLeftLowerREL);
 
-// nose - RELATIVE TO HEAD
-var noseMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,2, 0,0,0,1);
+var matrixTentSmallRightUpperREL = mulMatrix(matrixNoseREL, matrixTentSmallRightUpper);
+var matrixTentSmallRightLowerREL = mulMatrix(matrixNoseREL, matrixTentSmallRightLower);
+tentSmallRU.setMatrix(matrixTentSmallRightUpperREL);
+tentSmallRD.setMatrix(matrixTentSmallRightLowerREL);
 
-// claws - RELATIVE TO PAW
-var clawMatrixesFLArray = populateClawsMatrix(-1,-0.5,1.8,0.5);
-var clawMatrixesFRArray = populateClawsMatrix(-1,-0.5,1.8,0.5);
-var clawMatrixesBLArray = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
-var clawMatrixesBRArray = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
-
-// tenticals - RELATIVE TO NOSE
-var tentMatrixLArray = populateTentMatrix(0.75,0.75,1);
-var tentMatrixRArray = populateTentMatrix(-0.75,-0.75,1);
-var tentMatrixSmallLU = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
-var tentMatrixSmallLD = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
-var tentMatrixSmallRU = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
-var tentMatrixSmallRD = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
+addToScene();
 
 // TO-DO: PUT TOGETHER THE REST OF YOUR STAR-NOSED MOLE AND ADD TO THE SCENE!
 // Hint: Hint: Add one piece of geometry at a time, then implement the motion for that part. 
 //             Then you can make sure your hierarchy still works properly after each step.
 
-// CREATE BODY - MAIN BODY - RELATIVE TO TORSO
-var torso = new THREE.Mesh(torsoGeometry,normalMaterial);
-torso.setMatrix(torsoMatrix);
-
-var head = new THREE.Mesh(headGeometry,normalMaterial);
-var headMatrixMAIN = mulMatrix(torsoMatrix, headMatrix);
-head.setMatrix(headMatrixMAIN);
-
-var tail = new THREE.Mesh(tailGeometry,normalMaterial);
-var tailMatrixMAIN = mulMatrix(torsoMatrix, tailMatrix);
-tail.setMatrix(tailMatrixMAIN);
-
-var nose = new THREE.Mesh(noseGeometry,normalMaterial);
-var noseMatrixMAIN = mulMatrix(headMatrixMAIN, noseMatrix);
-nose.setMatrix(noseMatrixMAIN);
-
-var frontLegL = new THREE.Mesh(frontLegGeometry,normalMaterial);
-var frontLegLMatrixMAIN = mulMatrix(torsoMatrix, frontLegLMatrix);
-frontLegL.setMatrix(frontLegLMatrixMAIN);
-
-var frontLegR = new THREE.Mesh(frontLegGeometry,normalMaterial);
-var frontLegRMatrixMAIN = mulMatrix(torsoMatrix, frontLegRMatrix);
-frontLegR.setMatrix(frontLegRMatrixMAIN);
-
-var backLegL = new THREE.Mesh(backLegGeometry,normalMaterial);
-var backLegLMatrixMAIN = mulMatrix(torsoMatrix,backLegLMatrix);
-backLegL.setMatrix(backLegLMatrixMAIN);
-
-var backLegR = new THREE.Mesh(backLegGeometry,normalMaterial);
-var backLegRMatrixMAIN = mulMatrix(torsoMatrix,backLegRMatrix);
-backLegR.setMatrix(backLegRMatrixMAIN);
-
-// Front Limb
-var frontClawsL = populateClaw(clawGeometryLarge);
-setClawMatrix(frontClawsL, clawMatrixesFLArray, frontLegLMatrixMAIN);
-var frontClawsR = populateClaw(clawGeometryLarge);
-setClawMatrix(frontClawsR, clawMatrixesFRArray, frontLegRMatrixMAIN);
-
-// Back Limbs
-var backClawsL = populateClaw(clawGeometrySmall);
-setClawMatrix(backClawsL, clawMatrixesBLArray, backLegLMatrixMAIN);
-var backClawsR = populateClaw(clawGeometrySmall);
-setClawMatrix(backClawsR, clawMatrixesBRArray, backLegRMatrixMAIN);
-
-// Left Tenticlas
-var tentLAngleX = [-40,-30,-20,-10,0,10,20,30,40];
-var tentLAngleY = [0,10,20,30,40,30,20,10,0];
-var tentL = populateLargeTentGeo(tentLAngleX,tentLAngleY);
-setTentMatrix(tentL,tentMatrixLArray,noseMatrixMAIN);
-
-var tentSmallLU = new THREE.Mesh(tentGeometrySmall,normalMaterial);
-var tentSmallLUNose = mulMatrix(noseMatrixMAIN, tentMatrixSmallLU);
-tentSmallLU.setMatrix(tentSmallLUNose);
-
-var tentSmallLD = new THREE.Mesh(tentGeometrySmall,normalMaterial);
-var tentSmallLDNose = mulMatrix(noseMatrixMAIN, tentMatrixSmallLD);
-tentSmallLD.setMatrix(tentSmallLDNose);
-
-// Right Tenticals
-var tentRAngleX = [40,30,20,10,0,-10,-20,-30,-40];
-var tentRAngleY = [0,-10,-20,-30,-40,-30,-20,-10,0];
-var tentR = populateLargeTentGeo(tentRAngleX,tentRAngleY);
-setTentMatrix(tentR,tentMatrixRArray,noseMatrixMAIN);
-
-var tentSmallRU = new THREE.Mesh(tentGeometrySmall,normalMaterial);
-var tentSmallRUNose = mulMatrix(noseMatrixMAIN, tentMatrixSmallRU);
-tentSmallRU.setMatrix(tentSmallRUNose);
-
-var tentSmallRD = new THREE.Mesh(tentGeometrySmall,normalMaterial);
-var tentSmallRDNose = mulMatrix(noseMatrixMAIN, tentMatrixSmallRD);
-tentSmallRD.setMatrix(tentSmallRDNose);
-
-// add to scene
-scene.add(torso);
-scene.add(head);
-scene.add(tail);
-scene.add(nose);
-scene.add(frontLegL);
-scene.add(frontLegR);
-scene.add(backLegL);
-scene.add(backLegR);
-addClawsToScene(frontClawsL);
-addClawsToScene(frontClawsR);
-addClawsToScene(backClawsL);
-addClawsToScene(backClawsR);
-addTentToScene(tentL);
-addTentToScene(tentR);
-scene.add(tentSmallLU);
-scene.add(tentSmallLD);
-scene.add(tentSmallRU);
-scene.add(tentSmallRD);
 
 
 // APPLY DIFFERENT JUMP CUTS/ANIMATIONS TO DIFFERNET KEYS
@@ -475,16 +444,12 @@ function updateBody() {
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame 
         r = p;
-        if (key ==  "U") {
-          r = -p
+          if (key ==  "U") {
+            r = -p
         }
         var rotateZ = rotation(1,r, false);
-        var torsoMatrixR = mulMatrix(torsoMatrix, rotateZ);
-        applyEffect(torsoMatrixR);
+        xmatrixTorso = mulMatrix(matrixTorso,rotateZ); 
       break;
-
-      // TO-DO: IMPLEMENT JUMPCUT/ANIMATION FOR EACH KEY!
-      // Note: Remember spacebar sets jumpcut/animate!
       case ((key == "H" || key == "G") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
@@ -497,20 +462,8 @@ function updateBody() {
         if (key ==  "H") {
           r = -p
         }
-        var rotate = rotation(2,r, false);
-        headMatrixREL = mulMatrix(torsoMatrix, headMatrix);
-        headMatrixREL = mulMatrix(headMatrixREL,rotate);
-        noseMatrixREL = mulMatrix(headMatrixREL, noseMatrix);
-
-        head.setMatrix(headMatrixREL);
-        nose.setMatrix(noseMatrixREL);
-
-        setTentMatrix(tentL, tentMatrixLArray, noseMatrixREL);
-        setTentMatrix(tentR, tentMatrixRArray, noseMatrixREL);
-        tentSmallLU.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallLU));
-        tentSmallLD.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallLD));
-        tentSmallRU.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallRU));
-        tentSmallRD.setMatrix(mulMatrix(noseMatrixREL, tentMatrixSmallRD));
+        var rotateY = rotation(2,r, false);
+        xmatrixHead = mulMatrix(matrixHead,rotateY);
       break;
       case ((key == "T" || key == "V") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -524,10 +477,8 @@ function updateBody() {
         if (key ==  "V") {
           r = -p
         } 
-        var rotate = rotation(2,r/3, false);
-        var tempTorso = mulMatrix(torsoMatrix,rotate);
-        tailMatrixREL = mulMatrix(tempTorso,tailMatrix);
-        tail.setMatrix(tailMatrixREL);
+        var rotateY = rotation(2,r/2, false);
+        xmatrixTail = mulMatrix(matrixTail, rotateY);
       break;
       case ((key == "N") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -537,10 +488,40 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
+        var rotateL = rotation(2,p/2.5, false);
+        var rotateR = rotation(2,-p/2.5, false);
+        for (i = 0; i < numberOfTentical; i++) {
+          xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateL);
+          xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateR);
+        }
+        xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateL);
+        xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateL);
+        xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateR);
+        xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateR);
+      break;
+      case ((key == "S") && animate):
+        var time = clock.getElapsedTime(); // t seconds passed since the clock started.
+        if (time > time_end){
+          p = p1;
+          animate = false;
+          break;
+        }
+        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
+      break;
+      case ((key == "D") && animate):
+        var time = clock.getElapsedTime(); // t seconds passed since the clock started.
+        if (time > time_end){
+          p = p1;
+          animate = false;
+          break;
+        }
+        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
+
       break;
     default:
       break;
   }
+  drawMole();
 }
 
 // LISTEN TO KEYBOARD
@@ -558,11 +539,7 @@ keyboard.domElement.addEventListener('keydown',function(event){
     camera.position.set(45,0,0);
     camera.lookAt(scene.position);}
   else if(keyboard.eventMatches(event,"U")){ 
-    (key == "U")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "U");}  
-
-  // TO-DO: BIND KEYS TO YOUR JUMP CUTS AND ANIMATIONS
-  // Note: Remember spacebar sets jumpcut/animate! 
-  // Hint: Look up "threex.keyboardstate by Jerome Tienne" for more info.
+    (key == "U")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "U")}  
   else if(keyboard.eventMatches(event,"E")){ 
     (key == "E")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "E");} 
   else if(keyboard.eventMatches(event,"H")){ 
@@ -579,7 +556,7 @@ keyboard.domElement.addEventListener('keydown',function(event){
     (key == "S")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "S");}
   else if(keyboard.eventMatches(event,"D")){ 
     (key == "D")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "D");}
-    });
+  });
 
 // SETUP UPDATE CALL-BACK
 // Hint: It is useful to understand what is being updated here, the effect, and why.
