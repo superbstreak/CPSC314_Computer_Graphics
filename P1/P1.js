@@ -83,7 +83,7 @@ var tentRAngleY = [0,-10,-20,-30,-40,-30,-20,-10,0];
 
 var xmatrixTorso = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
 var xmatrixHead = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
-var xmatrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-7, 0,0,0,1);
+var xmatrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-4, 0,0,0,1);
 var xmatrixFrontLegLeft = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
 var xmatrixFrontLegRight = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
 var xmatrixBackLegLeft = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
@@ -93,8 +93,8 @@ var xmatrixClawFrontLeft = populateClawsMatrix(-1,-0.5,1.8,0.5);
 var xmatrixClawFrontRight = populateClawsMatrix(-1,-0.5,1.8,0.5);
 var xmatrixClawBackLeft = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
 var xmatrixClawBackRight = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
-var xmatrixTentLeft = populateTentMatrix(0.75,0.75,1);
-var xmatrixTentRight = populateTentMatrix(-0.75,-0.75,1);
+var xmatrixTentLeft = populateTentMatrix(1,1,1);
+var xmatrixTentRight = populateTentMatrix(-1,-1,1);
 var xmatrixTentSmallLeftUpper = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
 var xmatrixTentSmallLeftLower = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
 var xmatrixTentSmallRightUpper = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
@@ -119,11 +119,11 @@ var scaleTorso = scale(5,5,8);
 var scaleHead = scale(3,3,3);
 var rotationTail = rotation(1,-5, true);
 var scaleTail = scale(0.75,0.75,7.5); 
-var scaleNose = scale(1.5,1.5,1.5);
+var scaleNose = scale(2,2,2);
 var scaleFrontLeg = scale(2.5,1,3);
 var rotationLegs = rotation(1,15, true);
 var scaleBackLeg = scale(2,1,2.5);
-var scaleFingerLarge = scale(0.35,0.35, 1.5);
+var scaleFingerLarge = scale(0.35,0.35, 1);
 var scaleFingerSmall = scale(0.2,0.2, 1);
 var scaleTentLarge = scale(0.25,0.25,1.5);
 var scaleTentSmall = scale(0.25,0.25,1.5);
@@ -161,7 +161,7 @@ geometryTentSmall.applyMatrix(scaleTentSmall);
 // Main Body Part - MAIN BODY - RELATIVE TO TORSO
 var matrixTorso = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
 var matrixHead = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
-var matrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-7, 0,0,0,1);
+var matrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-4, 0,0,0,1);
 var matrixFrontLegLeft = new THREE.Matrix4().set(1,0,0,2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
 var matrixFrontLegRight = new THREE.Matrix4().set(1,0,0,-2, 0,1,0,-2.5, 0,0,1,3.75, 0,0,0,1);
 var matrixBackLegLeft = new THREE.Matrix4().set(1,0,0,2.5, 0,1,0,-2.9, 0,0,1,-2.5, 0,0,0,1);
@@ -177,8 +177,8 @@ var matrixClawBackLeft = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
 var matrixClawBackRight = populateClawsMatrix(-0.8,-0.5,1.5,0.4);
 
 // tenticals - RELATIVE TO NOSE
-var matrixTentLeft = populateTentMatrix(0.75,0.75,1);
-var matrixTentRight = populateTentMatrix(-0.75,-0.75,1);
+var matrixTentLeft = populateTentMatrix(1,1,1);
+var matrixTentRight = populateTentMatrix(-1,-1,1);
 var matrixTentSmallLeftUpper = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
 var matrixTentSmallLeftLower = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
 var matrixTentSmallRightUpper = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
@@ -305,10 +305,10 @@ function drawMole() {
   var xmatrixHeadREL = mulMatrix(xmatrixTorso, xmatrixHead);
   var xmatrixTailREL = mulMatrix(xmatrixTorso, xmatrixTail);
   var xmatrixNoseREL = mulMatrix(xmatrixHeadREL, xmatrixNose);
-  var xmatrixFrontLegLeftREL = mulMatrix(xmatrixTorso, matrixFrontLegLeft);
-  var xmatrixFrontLegRightREL = mulMatrix(xmatrixTorso, matrixFrontLegRight);
-  var xmatrixBackLegLeftREL = mulMatrix(xmatrixTorso,matrixBackLegLeft);
-  var xmatrixBackLegRightREL = mulMatrix(xmatrixTorso,matrixBackLegRight);
+  var xmatrixFrontLegLeftREL = mulMatrix(xmatrixTorso, xmatrixFrontLegLeft);
+  var xmatrixFrontLegRightREL = mulMatrix(xmatrixTorso, xmatrixFrontLegRight);
+  var xmatrixBackLegLeftREL = mulMatrix(xmatrixTorso, xmatrixBackLegLeft);
+  var xmatrixBackLegRightREL = mulMatrix(xmatrixTorso, xmatrixBackLegRight);
 
   torso.setMatrix(xmatrixTorso);
   head.setMatrix(xmatrixHeadREL);
@@ -319,10 +319,10 @@ function drawMole() {
   backLegL.setMatrix(xmatrixBackLegLeftREL);
   backLegR.setMatrix(xmatrixBackLegRightREL);
 
-  setToRELMatrix(frontClawsL, matrixClawFrontLeft, xmatrixFrontLegLeftREL, numberOfClaws);
-  setToRELMatrix(frontClawsR, matrixClawFrontRight, xmatrixFrontLegRightREL, numberOfClaws);
-  setToRELMatrix(backClawsL, matrixClawBackLeft, xmatrixBackLegLeftREL, numberOfClaws);
-  setToRELMatrix(backClawsR, matrixClawBackRight, xmatrixBackLegRightREL, numberOfClaws);
+  setToRELMatrix(frontClawsL, xmatrixClawFrontLeft, xmatrixFrontLegLeftREL, numberOfClaws);
+  setToRELMatrix(frontClawsR, xmatrixClawFrontRight, xmatrixFrontLegRightREL, numberOfClaws);
+  setToRELMatrix(backClawsL, xmatrixClawBackLeft, xmatrixBackLegLeftREL, numberOfClaws);
+  setToRELMatrix(backClawsR, xmatrixClawBackRight, xmatrixBackLegRightREL, numberOfClaws);
 
   setToRELMatrix(tentL,xmatrixTentLeft,xmatrixNoseREL,numberOfTentical);
   setToRELMatrix(tentR,xmatrixTentRight,xmatrixNoseREL,numberOfTentical);
@@ -418,6 +418,7 @@ var time_start; // start time of animation
 var time_end; // end time of animation
 var p; // current frame
 var animate = false; // animate?
+var swimCounter = 0;
 
 // function init_animation()
 // Initializes parameters and sets animate flag to true.
@@ -462,8 +463,8 @@ function updateBody() {
         if (key ==  "H") {
           r = -p
         }
-        var rotateY = rotation(2,r, false);
-        xmatrixHead = mulMatrix(matrixHead,rotateY);
+        var rotate = rotation(2,r, false);
+        xmatrixHead = mulMatrix(matrixHead,rotate);
       break;
       case ((key == "T" || key == "V") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -477,8 +478,8 @@ function updateBody() {
         if (key ==  "V") {
           r = -p
         } 
-        var rotateY = rotation(2,r/2, false);
-        xmatrixTail = mulMatrix(matrixTail, rotateY);
+        var rotate = rotation(2,r/2, false);
+        xmatrixTail = mulMatrix(matrixTail, rotate);
       break;
       case ((key == "N") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -488,8 +489,8 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-        var rotateL = rotation(2,p/2.5, false);
-        var rotateR = rotation(2,-p/2.5, false);
+        var rotateL = rotation(2,p/1.5, false);
+        var rotateR = rotation(2,-p/1.5, false);
         for (i = 0; i < numberOfTentical; i++) {
           xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateL);
           xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateR);
@@ -507,6 +508,55 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
+        var rotatePawPos = rotation(1,p/2,false);
+
+        var rotateTailL = rotation(2,p/3,false);
+        var rotateTailR = rotation(2,-p/3,false);
+        var rotateTailO = rotation(2,-p/3*time_length,false);
+
+        var rotateHeadL = rotation(2,p,false);
+        var rotateHeadR = rotation(2,-p/time_length,false);
+        var rotateHeadO = rotation(2,-p/time_length,false);
+
+        var rotateTentL = rotation(2,p, false);
+        var rotateTentR = rotation(2,0,false);
+
+        if (swimCounter == 1) {
+          xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePawPos);
+          xmatrixBackLegRight = mulMatrix(matrixBackLegRight, rotatePawPos);
+          xmatrixHead = mulMatrix(matrixHead, rotateHeadL);
+          xmatrixTail = mulMatrix(matrixTail, rotateTailL);
+
+          for (i = 0; i < numberOfTentical; i++) {
+            xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateTentL);
+            xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateTentR);
+          }
+          xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateTentL);
+          xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateTentL);
+          xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateTentR);
+          xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateTentR);
+        } else if (swimCounter == 2) {
+          xmatrixHead = mulMatrix(matrixHead, rotateHeadR);
+          xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawPos);
+          
+          xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawPos);
+          xmatrixTail = mulMatrix(matrixTail, rotateTailR);
+          xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotation(1,0,true));
+          xmatrixBackLegRight = mulMatrix(matrixBackLegRight,  rotation(1,0,true));
+          for (i = 0; i < numberOfTentical; i++) {
+            xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateTailO);
+            xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateTailO);
+          }
+          xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateTailO);
+          xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateTailO);
+          xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateTailO);
+          xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateTailO);
+        } else {
+          xmatrixHead = mulMatrix(matrixHead, rotateHeadO);
+          xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawPos);
+          xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawPos);
+          xmatrixTail = mulMatrix(matrixTail, rotateTailO);
+        }
       break;
       case ((key == "D") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -516,7 +566,14 @@ function updateBody() {
           break;
         }
         p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-
+        var rotatePaw = rotation(1,p/2,false);
+        var rotateCalw = rotation(1, p/1.5, false);
+        xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePaw);
+        xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePaw);
+        for (i = 0; i < numberOfClaws; i++) {
+          xmatrixClawFrontRight[i] = mulMatrix(matrixClawFrontRight[i], rotateCalw);
+          xmatrixClawFrontLeft[i] = mulMatrix(matrixClawFrontLeft[i], rotateCalw);
+        }
       break;
     default:
       break;
@@ -552,8 +609,15 @@ keyboard.domElement.addEventListener('keydown',function(event){
     (key == "V")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "V");}
   else if(keyboard.eventMatches(event,"N")){ 
     (key == "N")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "N");}
-  else if(keyboard.eventMatches(event,"S")){ 
-    (key == "S")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "S");}
+  else if(keyboard.eventMatches(event,"S")){
+        if (swimCounter < 2) {
+          (init_animation(0,Math.PI/4,1), key="S");
+          swimCounter += 1;
+        } else {
+          (init_animation(p1,p0,time_length), key="S");
+          swimCounter = 0;
+        }
+  }
   else if(keyboard.eventMatches(event,"D")){ 
     (key == "D")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "D");}
   });
