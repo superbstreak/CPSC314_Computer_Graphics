@@ -219,7 +219,6 @@ function mulMatrix(matrix,app) {
   return new THREE.Matrix4().multiplyMatrices(matrix,app);
 }
 
-
 // matrix population
 function populateClawsMatrix(startX, fixedY, fixedZ, spacing) {
   var claws = [];
@@ -239,7 +238,6 @@ function populateTentMatrix(x,y,z) {
   }
   return tenticals;
 }
-
 
 // Geometry population
 function populateLargeTentGeometry(angleX, angleY) {
@@ -338,6 +336,70 @@ function drawMole() {
   tentSmallRD.setMatrix(xmatrixTentSmallRightLowerREL);
 }
 
+function performTorsoRotation(p) {
+  var rotateZ = rotation(1,p, false);
+  xmatrixTorso = mulMatrix(matrixTorso,rotateZ); 
+}
+
+function performHeadRotation(p) {
+  var rotate = rotation(2,p, false);
+  xmatrixHead = mulMatrix(matrixHead,rotate);
+}
+
+function performTailRotation(p) {
+  var rotate = rotation(2,p/2, false);
+  xmatrixTail = mulMatrix(matrixTail, rotate);
+}
+
+function performFanOut(p) {
+  var rotateL = rotation(2,p/1.5, false);
+  var rotateR = rotation(2,-p/1.5, false);
+  for (i = 0; i < numberOfTentical; i++) {
+    xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateL);
+    xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateR);
+  }
+  xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateL);
+  xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateL);
+  xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateR);
+  xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateR);
+}
+
+function performSwin(p) {
+  var rotatePawPos = rotation(1,p/2,false);
+  switch (swimCounter) {
+    case 1:
+      performHeadRotation(-p);
+      performTailRotation(-p);
+      performFanOut(p);
+      xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePawPos);
+      xmatrixBackLegRight = mulMatrix(matrixBackLegRight, rotatePawPos);
+    break;
+    case 2:
+      performHeadRotation(p);
+      performTailRotation(p);
+      performFanOut(p);
+      xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawPos);
+      xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawPos);
+    break;
+    default:
+      performHeadRotation(p);
+      performTailRotation(p);
+      performFanOut(p);
+    break;
+  }
+}
+
+function performDig(p) {
+  var rotatePaw = rotation(1,p/2,false);
+  var rotateCalw = rotation(1, p/1.5, false);
+  xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePaw);
+  xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePaw);
+  for (i = 0; i < numberOfClaws; i++) {
+    xmatrixClawFrontRight[i] = mulMatrix(matrixClawFrontRight[i], rotateCalw);
+    xmatrixClawFrontLeft[i] = mulMatrix(matrixClawFrontLeft[i], rotateCalw);
+  }
+}
+
 // ===============================================================================       
 
 // CREATE BODY
@@ -419,6 +481,7 @@ var time_end; // end time of animation
 var p; // current frame
 var animate = false; // animate?
 var swimCounter = 0;
+var jumpCut = true;
 
 // function init_animation()
 // Initializes parameters and sets animate flag to true.
@@ -442,14 +505,9 @@ function updateBody() {
           p = p1;
           animate = false;
           break;
-        }
-        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame 
-        r = p;
-          if (key ==  "U") {
-            r = -p
-        }
-        var rotateZ = rotation(1,r, false);
-        xmatrixTorso = mulMatrix(matrixTorso,rotateZ); 
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        performTorsoRotation((key ==  "U")? -p : p);
       break;
       case ((key == "H" || key == "G") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -457,14 +515,9 @@ function updateBody() {
           p = p1;
           animate = false;
           break;
-        }
-        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame 
-        r = p;
-        if (key ==  "H") {
-          r = -p
-        }
-        var rotate = rotation(2,r, false);
-        xmatrixHead = mulMatrix(matrixHead,rotate);
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame 
+        performHeadRotation((key ==  "H")? -p : p);
       break;
       case ((key == "T" || key == "V") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -472,14 +525,9 @@ function updateBody() {
           p = p1;
           animate = false;
           break;
-        }
-        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-        r = p;
-        if (key ==  "V") {
-          r = -p
         } 
-        var rotate = rotation(2,r/2, false);
-        xmatrixTail = mulMatrix(matrixTail, rotate);
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        performTailRotation((key ==  "V")? -p : p);
       break;
       case ((key == "N") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -487,18 +535,9 @@ function updateBody() {
           p = p1;
           animate = false;
           break;
-        }
-        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-        var rotateL = rotation(2,p/1.5, false);
-        var rotateR = rotation(2,-p/1.5, false);
-        for (i = 0; i < numberOfTentical; i++) {
-          xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateL);
-          xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateR);
-        }
-        xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateL);
-        xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateL);
-        xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateR);
-        xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateR);
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        performFanOut(p);
       break;
       case ((key == "S") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -506,57 +545,9 @@ function updateBody() {
           p = p1;
           animate = false;
           break;
-        }
-        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-        var rotatePawPos = rotation(1,p/2,false);
-
-        var rotateTailL = rotation(2,p/3,false);
-        var rotateTailR = rotation(2,-p/3,false);
-        var rotateTailO = rotation(2,-p/3*time_length,false);
-
-        var rotateHeadL = rotation(2,p,false);
-        var rotateHeadR = rotation(2,-p/time_length,false);
-        var rotateHeadO = rotation(2,-p/time_length,false);
-
-        var rotateTentL = rotation(2,p, false);
-        var rotateTentR = rotation(2,0,false);
-
-        if (swimCounter == 1) {
-          xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePawPos);
-          xmatrixBackLegRight = mulMatrix(matrixBackLegRight, rotatePawPos);
-          xmatrixHead = mulMatrix(matrixHead, rotateHeadL);
-          xmatrixTail = mulMatrix(matrixTail, rotateTailL);
-
-          for (i = 0; i < numberOfTentical; i++) {
-            xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateTentL);
-            xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateTentR);
-          }
-          xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateTentL);
-          xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateTentL);
-          xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateTentR);
-          xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateTentR);
-        } else if (swimCounter == 2) {
-          xmatrixHead = mulMatrix(matrixHead, rotateHeadR);
-          xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawPos);
-          
-          xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawPos);
-          xmatrixTail = mulMatrix(matrixTail, rotateTailR);
-          xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotation(1,0,true));
-          xmatrixBackLegRight = mulMatrix(matrixBackLegRight,  rotation(1,0,true));
-          for (i = 0; i < numberOfTentical; i++) {
-            xmatrixTentLeft[i] = mulMatrix(matrixTentLeft[i],rotateTailO);
-            xmatrixTentRight[i] = mulMatrix(matrixTentRight[i],rotateTailO);
-          }
-          xmatrixTentSmallLeftLower = mulMatrix(matrixTentSmallLeftLower, rotateTailO);
-          xmatrixTentSmallLeftUpper = mulMatrix(matrixTentSmallLeftUpper, rotateTailO);
-          xmatrixTentSmallRightLower = mulMatrix(matrixTentSmallRightLower, rotateTailO);
-          xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateTailO);
-        } else {
-          xmatrixHead = mulMatrix(matrixHead, rotateHeadO);
-          xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawPos);
-          xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawPos);
-          xmatrixTail = mulMatrix(matrixTail, rotateTailO);
-        }
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        performSwin(p);
       break;
       case ((key == "D") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
@@ -564,16 +555,9 @@ function updateBody() {
           p = p1;
           animate = false;
           break;
-        }
-        p = (p1 - p0)*((time-time_start)/time_length) + p0; // current frame
-        var rotatePaw = rotation(1,p/2,false);
-        var rotateCalw = rotation(1, p/1.5, false);
-        xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePaw);
-        xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePaw);
-        for (i = 0; i < numberOfClaws; i++) {
-          xmatrixClawFrontRight[i] = mulMatrix(matrixClawFrontRight[i], rotateCalw);
-          xmatrixClawFrontLeft[i] = mulMatrix(matrixClawFrontLeft[i], rotateCalw);
-        }
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        performDig(p);
       break;
     default:
       break;
@@ -620,6 +604,9 @@ keyboard.domElement.addEventListener('keydown',function(event){
   }
   else if(keyboard.eventMatches(event,"D")){ 
     (key == "D")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "D");}
+  else if(keyboard.eventMatches(event," ")){ 
+    jumpCut = !jumpCut;
+  }
   });
 
 // SETUP UPDATE CALL-BACK
