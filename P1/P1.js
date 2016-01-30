@@ -364,8 +364,9 @@ function performFanOut(p) {
   xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateR);
 }
 
-function performSwin(p) {
+function performSwin(p, rp) {
   var rotatePawPos = rotation(1,p/2,false);
+  var rotatePawNul = rotation(1,rp/2,false);
   switch (swimCounter) {
     case 1:
       performHeadRotation(-p);
@@ -380,11 +381,15 @@ function performSwin(p) {
       performFanOut(p);
       xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawPos);
       xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawPos);
+      xmatrixFrontLegLeft = mulMatrix(matrixFrontLegLeft, rotatePawNul);
+      xmatrixBackLegRight = mulMatrix(matrixBackLegRight, rotatePawNul);
     break;
     default:
       performHeadRotation(p);
       performTailRotation(p);
       performFanOut(p);
+      xmatrixFrontLegRight = mulMatrix(matrixFrontLegRight, rotatePawNul);
+      xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePawNul);
     break;
   }
 }
@@ -547,7 +552,8 @@ function updateBody() {
           break;
         } 
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
-        performSwin(p);
+        z = (jumpCut)? 0 : ((0 - Math.PI/4)*((time-time_start)/time_length) + Math.PI/4); // sub frame
+        performSwin(p, z);
       break;
       case ((key == "D") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
