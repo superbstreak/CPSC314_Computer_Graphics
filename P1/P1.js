@@ -493,14 +493,75 @@ var time_end; // end time of animation
 var p; // current frame
 var animate = false; // animate?
 var swimCounter = 0;
-var jumpCut = true;
+var actionQueue = {
+  U: false,
+  E: false,
+  H: false,
+  G: false,
+  T: false,
+  V: false,
+  S: false,
+  N: false,
+  D: false};
+var jumpCut = false;
+
+// actionManager: keep track of which key has been pressed and dir of action
+function actionManager(keyHit) {
+  var result = false;
+  switch (keyHit) {
+    case "U":
+      result = actionQueue.U;
+      actionQueue.U = !result;
+    break;
+    case "E":
+      result = actionQueue.E;
+      actionQueue.E = !result;
+    break;
+    case "H":
+      result = actionQueue.H;
+      actionQueue.H = !result;
+    break;
+    case "G":
+      result = actionQueue.G;
+      actionQueue.G = !result;
+    break;
+    case "T":
+      result = actionQueue.T;
+      actionQueue.T = !result;
+    break;
+    case "V":
+      result = actionQueue.V;
+      actionQueue.V = !result;
+    break;
+    case "S":
+      result = actionQueue.S;
+      actionQueue.S = !result;
+    break;
+    case "N":
+      result = actionQueue.N;
+      actionQueue.N = !result;
+    break;
+    case "D":
+      result = actionQueue.D;
+      actionQueue.D = !result;
+    break;
+    default:
+      console.log("Unkown");
+    break;
+  }
+  return result;
+}
 
 // function init_animation()
 // Initializes parameters and sets animate flag to true.
 // Input: start position or angle, end position or angle, and total time of animation.
-function init_animation(p_start,p_end,t_length){
+function init_animation(p_start,p_end,t_length,dirToggle){
   p0 = p_start;
   p1 = p_end;
+  if (dirToggle && p_start == 0) {
+    p0 = p_end;
+    p1 = p_start;
+  }
   time_length = t_length;
   time_start = clock.getElapsedTime();
   time_end = time_start + time_length;
@@ -583,6 +644,7 @@ function updateBody() {
 var keyboard = new THREEx.KeyboardState();
 var grid_state = false;
 var key;
+var keyState;
 keyboard.domElement.addEventListener('keydown',function(event){
   if (event.repeat)
     return;
@@ -592,31 +654,49 @@ keyboard.domElement.addEventListener('keydown',function(event){
   else if(keyboard.eventMatches(event,"0")){    // 0: Set camera to neutral position, view reset
     camera.position.set(45,0,0);
     camera.lookAt(scene.position);}
-  else if(keyboard.eventMatches(event,"U")){ 
-    (key == "U")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "U")}  
+  else if(keyboard.eventMatches(event,"U")){
+    key = "U";
+    keyState = actionManager("U");
+    (keyState)? init_animation(p1,p0,time_length,keyState): (init_animation(0,Math.PI/4,1,keyState), key = "U");}  
   else if(keyboard.eventMatches(event,"E")){ 
-    (key == "E")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "E");} 
+    key = "E";
+    keyState = actionManager("E");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "E");} 
   else if(keyboard.eventMatches(event,"H")){ 
-    (key == "H")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "H");}
+    key = "H";
+    keyState = actionManager("H");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "H");}
   else if(keyboard.eventMatches(event,"G")){ 
-    (key == "G")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "G");}
+    key = "G";
+    keyState = actionManager("G");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "G");}
   else if(keyboard.eventMatches(event,"T")){ 
-    (key == "T")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "T");}
+    key = "T";
+    keyState = actionManager("T");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "T");}
   else if(keyboard.eventMatches(event,"V")){ 
-    (key == "V")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "V");}
+    key = "V";
+    keyState = actionManager("V");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "V");}
   else if(keyboard.eventMatches(event,"N")){ 
-    (key == "N")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "N");}
+    key = "N";
+    keyState = actionManager("N");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "N");}
   else if(keyboard.eventMatches(event,"S")){
-        if (swimCounter < 2) { 
-          (init_animation(0,Math.PI/4,1), key="S");
-          swimCounter += 1;
-        } else {
-          (init_animation(p1,p0,time_length), key="S");
-          swimCounter = 0;
-        }
+    key = "N";
+    keyState = actionManager("S");
+    if (swimCounter < 2) { 
+      (init_animation(0,Math.PI/4,1,false), key="S");
+      swimCounter += 1;
+    } else {
+      (init_animation(p1,p0,time_length,false), key="S");
+      swimCounter = 0;
+    }
   }
   else if(keyboard.eventMatches(event,"D")){ 
-    (key == "D")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "D");}
+    key = "D";
+    keyState = actionManager("D");
+    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "D");}
   else if(keyboard.eventMatches(event," ")){ 
     jumpCut = !jumpCut; // toggle jump cut
   }
