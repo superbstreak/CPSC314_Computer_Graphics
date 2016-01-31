@@ -507,43 +507,94 @@ var jumpCut = false;
 
 // actionManager: keep track of which key has been pressed and dir of action
 function actionManager(keyHit) {
-  var result = false;
+  var result = {toggle: false, keyState: ""};
   switch (keyHit) {
     case "U":
-      result = actionQueue.U;
-      actionQueue.U = !result;
+      if (actionQueue.E) {
+        result.toggle = true;
+        result.keyState = "E";
+        actionQueue.U = false;
+        actionQueue.E = false;
+      } else {
+        result.toggle = actionQueue.U;
+        result.keyState = "U";
+        actionQueue.U = !result.toggle;
+      }
     break;
     case "E":
-      result = actionQueue.E;
-      actionQueue.E = !result;
+      if (actionQueue.U) {
+          result.toggle = true;
+          result.keyState = "U";
+          actionQueue.U = false;
+          actionQueue.E = false;
+      } else {
+          result.toggle = actionQueue.E;
+          result.keyState = "E";
+          actionQueue.E = !result.toggle;
+      }
     break;
     case "H":
-      result = actionQueue.H;
-      actionQueue.H = !result;
+      if (actionQueue.G) {
+        result.toggle = true;
+        result.keyState = "G";
+        actionQueue.H = false;
+        actionQueue.G = false;
+      } else {
+        result.toggle = actionQueue.H;
+        result.keyState = "H";
+        actionQueue.H = !result.toggle;
+      }
     break;
     case "G":
-      result = actionQueue.G;
-      actionQueue.G = !result;
+      if (actionQueue.H) {
+        result.toggle = true;
+        result.keyState = "H";
+        actionQueue.H = false;
+        actionQueue.G = false;
+      } else {
+        result.toggle = actionQueue.G;
+        result.keyState = "G";
+        actionQueue.G = !result.toggle;
+      }
     break;
     case "T":
-      result = actionQueue.T;
-      actionQueue.T = !result;
+      if (actionQueue.V) {
+        result.toggle = true;
+        result.keyState = "V";
+        actionQueue.T = false;
+        actionQueue.V = false;
+      } else {
+        result.toggle = actionQueue.T;
+        result.keyState = "T";
+        actionQueue.T = !result.toggle;
+      }
     break;
     case "V":
-      result = actionQueue.V;
-      actionQueue.V = !result;
+      if (actionQueue.T) {
+        result.toggle = true;
+        result.keyState = "T";
+        actionQueue.T = false;
+        actionQueue.V = false;
+      } else {
+        result.toggle = actionQueue.V;
+        result.keyState = "V";
+        actionQueue.V = !result.toggle;
+      }
     break;
     case "S":
-      result = actionQueue.S;
-      actionQueue.S = !result;
+      result.toggle = false;
+      result.keyState = "S";
+      actionQueue.S = !result.toggle;
     break;
     case "N":
-      result = actionQueue.N;
-      actionQueue.N = !result;
+      result.toggle = actionQueue.N;
+      result.keyState = "N";
+      actionQueue.N = !result.toggle;
     break;
     case "D":
-      result = actionQueue.D;
-      actionQueue.D = !result;
+      result.toggle = actionQueue.D;
+      result.keyState = "D";
+      actionQueue.D = !result.toggle;
     break;
     default:
       console.log("Unkown");
@@ -645,6 +696,8 @@ var keyboard = new THREEx.KeyboardState();
 var grid_state = false;
 var key;
 var keyState;
+var toggle;
+var decision;
 keyboard.domElement.addEventListener('keydown',function(event){
   if (event.repeat)
     return;
@@ -655,48 +708,57 @@ keyboard.domElement.addEventListener('keydown',function(event){
     camera.position.set(45,0,0);
     camera.lookAt(scene.position);}
   else if(keyboard.eventMatches(event,"U")){
-    key = "U";
-    keyState = actionManager("U");
-    (keyState)? init_animation(p1,p0,time_length,keyState): (init_animation(0,Math.PI/4,1,keyState), key = "U");}  
+    decision = actionManager("U");
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle): (init_animation(0,Math.PI/4,1,toggle));}  
   else if(keyboard.eventMatches(event,"E")){ 
-    key = "E";
-    keyState = actionManager("E");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "E");} 
-  else if(keyboard.eventMatches(event,"H")){ 
-    key = "H";
-    keyState = actionManager("H");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "H");}
-  else if(keyboard.eventMatches(event,"G")){ 
-    key = "G";
-    keyState = actionManager("G");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "G");}
-  else if(keyboard.eventMatches(event,"T")){ 
-    key = "T";
-    keyState = actionManager("T");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "T");}
-  else if(keyboard.eventMatches(event,"V")){ 
-    key = "V";
-    keyState = actionManager("V");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "V");}
-  else if(keyboard.eventMatches(event,"N")){ 
-    key = "N";
-    keyState = actionManager("N");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "N");}
+    decision = actionManager("E");
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));} 
+  else if(keyboard.eventMatches(event,"H")){
+    decision = actionManager("H"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+  else if(keyboard.eventMatches(event,"G")){
+    decision = actionManager("G"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+  else if(keyboard.eventMatches(event,"T")){
+    decision = actionManager("T"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+  else if(keyboard.eventMatches(event,"V")){
+    decision = actionManager("V"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+  else if(keyboard.eventMatches(event,"N")){
+    decision = actionManager("N"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event,"S")){
-    key = "N";
-    keyState = actionManager("S");
+    decision = actionManager("S");
+    toggle = decision.toggle;
+    key = decision.keyState;
     if (swimCounter < 2) { 
-      (init_animation(0,Math.PI/4,1,false), key="S");
+      (init_animation(0,Math.PI/4,1,toggle));
       swimCounter += 1;
     } else {
-      (init_animation(p1,p0,time_length,false), key="S");
+      (init_animation(p1,p0,time_length,toggle));
       swimCounter = 0;
     }
   }
-  else if(keyboard.eventMatches(event,"D")){ 
-    key = "D";
-    keyState = actionManager("D");
-    (keyState)? init_animation(p1,p0,time_length,keyState) : (init_animation(0,Math.PI/4,1,keyState), key = "D");}
+  else if(keyboard.eventMatches(event,"D")){
+    decision = actionManager("D"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event," ")){ 
     jumpCut = !jumpCut; // toggle jump cut
   }
