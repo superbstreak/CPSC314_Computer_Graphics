@@ -146,8 +146,6 @@ geometryTentSmall.applyMatrix(scaleTentSmall);
 
 // ===============================================================================
 // Matrix 
-//
-// Hierarchy
 //           World
 //             |
 //           Torso
@@ -190,10 +188,6 @@ var matrixTentSmallRightLower = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,-0.2, 
 // Custom Functions
 // ===============================================================================
 
-// rotation: generate a matrix for rotation
-//    axis = which axis 1, 2 or 3 (x,y or z)
-//    deg = accept both rad and degree
-//    useDegree = True: degree will be convert to rad 
 function rotation(axis,deg, useDegree) {
   var tmpRotation;
   if (useDegree) {
@@ -213,30 +207,19 @@ function rotation(axis,deg, useDegree) {
   return tmpRotation;
 }
 
-// translation: generate translation matrix
-//    x y and z = amount of translation for each
 function translation(x,y,z) {
   return new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1);
 }
 
-// scale: generate scale matrix
-//    x y and z = amount of scale for each
 function scale(x,y,z) {
   return new THREE.Matrix4().set(x,0,0,0, 0,y,0,0, 0,0,z,0, 0,0,0,1);
 }
 
-// mulMatrix: multiply matrix together A*B
-//    matrix = A
-//    app = B
 function mulMatrix(matrix,app) {
   return new THREE.Matrix4().multiplyMatrices(matrix,app);
 }
 
-// populateClawsMatrix: bulk matrix population for claws
-//    startX = starting x position
-//    fixedY = fixed Y for the matrix
-//    fixedZ = fixed Z for the matrix
-//    spacing = how far apart each claw will be with each other. only in x dir
+// matrix population
 function populateClawsMatrix(startX, fixedY, fixedZ, spacing) {
   var claws = [];
   for (i=0; i<numberOfClaws; i++) {
@@ -245,8 +228,6 @@ function populateClawsMatrix(startX, fixedY, fixedZ, spacing) {
   return claws;
 }
 
-// populateTentMatrix: bulk matrix population for tentacles arrange into a circle
-//    x y and z = the fixed X, Y, Z position for the initial tentacle at degree 0
 function populateTentMatrix(x,y,z) {
   var tenticals = [];
   for (i = 0; i < numberOfTentical; i++) {
@@ -258,9 +239,7 @@ function populateTentMatrix(x,y,z) {
   return tenticals;
 }
 
-// populateLargeTentGeometry: bulk Geometry population for Large tentacles with custom tilt
-//    angleX = an array of degrees (in deg) to rotate the tentacle in the X axis
-//    angleY = an array of degrees (in deg) to rotate the tentacle in the Y axis
+// Geometry population
 function populateLargeTentGeometry(angleX, angleY) {
   var tenticals = [];
   for (i = 0; i < numberOfTentical; i++) {
@@ -274,8 +253,6 @@ function populateLargeTentGeometry(angleX, angleY) {
   return tenticals;
 }
 
-// populateClaw: bulk geometry population for claws
-//    clawGeo = either large or small claws geomerty
 function populateClaw(clawGeo) {
   var claws = [];
   for (i=0; i<numberOfClaws; i++) {
@@ -284,19 +261,14 @@ function populateClaw(clawGeo) {
   return claws;
 }
 
-// setToRELMatrix: custom bulk setMatrix that apply multiply (Relative) before setting
-//    bodyPart = an array of mesh
-//    matrix = the matrix relative to their parent
-//    relativeTo = parent in the heiarchy
-//    length = length of matrix and bodyPart
+// set matrix
 function setToRELMatrix(bodyPart, matrix, relativeTo, length) {
   for (i = 0; i<length; i++) {
     bodyPart[i].setMatrix(mulMatrix(relativeTo,matrix[i]));
   }
 }
 
-// addListToScene: add list of mesh to scene. Helper of addToScene()
-//    list = list of mesh
+// add list to scene
 function addListToScene(list) {
    if (list) {
     var len = list.length;
@@ -306,7 +278,6 @@ function addListToScene(list) {
    }
 }
 
-// addToScene: add every body part to scene.
 function addToScene() {
   scene.add(torso);
   scene.add(head);
@@ -328,7 +299,6 @@ function addToScene() {
   scene.add(tentSmallRD);
 }
 
-//  drawMole: (re)calculate the relative position of each body part then set the matrix accordingly
 function drawMole() {
   var xmatrixHeadREL = mulMatrix(xmatrixTorso, xmatrixHead);
   var xmatrixTailREL = mulMatrix(xmatrixTorso, xmatrixTail);
@@ -366,29 +336,21 @@ function drawMole() {
   tentSmallRD.setMatrix(xmatrixTentSmallRightLowerREL);
 }
 
-// performTorsoRotation: associate to the key U and E. rotate the torso
-//    p = the current frame, incr for smooth animation
 function performTorsoRotation(p) {
   var rotateZ = rotation(1,p, false);
   xmatrixTorso = mulMatrix(matrixTorso,rotateZ); 
 }
 
-// performHeadRotation: associate to the key H and G. rotate the head
-//    p = the current frame, incr for smooth animation
 function performHeadRotation(p) {
   var rotate = rotation(2,p, false);
   xmatrixHead = mulMatrix(matrixHead,rotate);
 }
 
-// performTailRotation: associate to the key T and V. rotate the tail
-//    p = the current frame, incr for smooth animation
 function performTailRotation(p) {
   var rotate = rotation(2,p/2, false);
   xmatrixTail = mulMatrix(matrixTail, rotate);
 }
 
-// performFanOut: associate to the key N. rotate each individual tentacle out along a specific axis
-//    p = the current frame, incr for smooth animation
 function performFanOut(p) {
   var rotateL = rotation(2,p/1.5, false);
   var rotateR = rotation(2,-p/1.5, false);
@@ -402,10 +364,6 @@ function performFanOut(p) {
   xmatrixTentSmallRightUpper = mulMatrix(matrixTentSmallRightUpper, rotateR);
 }
 
-// performSwin: associate to the key S. make use of the swimCounter to determine which sequenc of actions
-//              to perform. rotate head, tail and selectively rotate paws. Also fan out tentacles
-//    p = the current frame, incr for smooth animation
-//    rp = for rotating to paws backwards at swimCounter == 2
 function performSwin(p, rp) {
   var rotatePawPos = rotation(1,p/2,false);
   var rotatePawNul = rotation(1,rp/2,false);
@@ -436,8 +394,6 @@ function performSwin(p, rp) {
   }
 }
 
-// performDig: associate to the key D. rotate the paws and then rotate the claws even more
-//    p = the current frame, incr for smooth animation
 function performDig(p) {
   var rotatePaw = rotation(1,p/2,false);
   var rotateCalw = rotation(1, p/1.5, false);
@@ -471,11 +427,48 @@ var tentSmallLD = new THREE.Mesh(geometryTentSmall,normalMaterial);
 var tentSmallRU = new THREE.Mesh(geometryTentSmall,normalMaterial);
 var tentSmallRD = new THREE.Mesh(geometryTentSmall,normalMaterial);
 
-// draw initial body
-drawMole();
+// var matrixHeadREL = mulMatrix(matrixTorso, matrixHead);
+// var matrixTailREL = mulMatrix(matrixTorso, matrixTail);
+// var matrixNoseREL = mulMatrix(matrixHeadREL, matrixNose);
+// var matrixFrontLegLeftREL = mulMatrix(matrixTorso, matrixFrontLegLeft);
+// var matrixFrontLegRightREL = mulMatrix(matrixTorso, matrixFrontLegRight);
+// var matrixBackLegLeftREL = mulMatrix(matrixTorso,matrixBackLegLeft);
+// var matrixBackLegRightREL = mulMatrix(matrixTorso,matrixBackLegRight);
 
-// add body to scene
+// torso.setMatrix(matrixTorso);
+// head.setMatrix(matrixHeadREL);
+// tail.setMatrix(matrixTailREL);
+// nose.setMatrix(matrixNoseREL);
+// frontLegL.setMatrix(matrixFrontLegLeftREL);
+// frontLegR.setMatrix(matrixFrontLegRightREL);
+// backLegL.setMatrix(matrixBackLegLeftREL);
+// backLegR.setMatrix(matrixBackLegRightREL);
+
+// setToRELMatrix(frontClawsL, matrixClawFrontLeft, matrixFrontLegLeftREL, numberOfClaws);
+// setToRELMatrix(frontClawsR, matrixClawFrontRight, matrixFrontLegRightREL, numberOfClaws);
+// setToRELMatrix(backClawsL, matrixClawBackLeft, matrixBackLegLeftREL, numberOfClaws);
+// setToRELMatrix(backClawsR, matrixClawBackRight, matrixBackLegRightREL, numberOfClaws);
+
+// setToRELMatrix(tentL,matrixTentLeft,matrixNoseREL,numberOfTentical);
+// setToRELMatrix(tentR,matrixTentRight,matrixNoseREL,numberOfTentical);
+
+// var matrixTentSmallLeftUpperREL = mulMatrix(matrixNoseREL, matrixTentSmallLeftUpper);
+// var matrixTentSmallLeftLowerREL = mulMatrix(matrixNoseREL, matrixTentSmallLeftLower);
+// tentSmallLU.setMatrix(matrixTentSmallLeftUpperREL);
+// tentSmallLD.setMatrix(matrixTentSmallLeftLowerREL);
+
+// var matrixTentSmallRightUpperREL = mulMatrix(matrixNoseREL, matrixTentSmallRightUpper);
+// var matrixTentSmallRightLowerREL = mulMatrix(matrixNoseREL, matrixTentSmallRightLower);
+// tentSmallRU.setMatrix(matrixTentSmallRightUpperREL);
+// tentSmallRD.setMatrix(matrixTentSmallRightLowerREL);
+drawMole();
 addToScene();
+
+// TO-DO: PUT TOGETHER THE REST OF YOUR STAR-NOSED MOLE AND ADD TO THE SCENE!
+// Hint: Hint: Add one piece of geometry at a time, then implement the motion for that part. 
+//             Then you can make sure your hierarchy still works properly after each step.
+
+
 
 // APPLY DIFFERENT JUMP CUTS/ANIMATIONS TO DIFFERNET KEYS
 // Note: The start of "U" animation has been done for you, you must implement the hiearchy and jumpcut.
@@ -575,7 +568,7 @@ function updateBody() {
     default:
       break;
   }
-  drawMole(); // update model
+  drawMole();
 }
 
 // LISTEN TO KEYBOARD
@@ -607,7 +600,7 @@ keyboard.domElement.addEventListener('keydown',function(event){
   else if(keyboard.eventMatches(event,"N")){ 
     (key == "N")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "N");}
   else if(keyboard.eventMatches(event,"S")){
-        if (swimCounter < 2) { 
+        if (swimCounter < 2) {
           (init_animation(0,Math.PI/4,1), key="S");
           swimCounter += 1;
         } else {
@@ -618,7 +611,7 @@ keyboard.domElement.addEventListener('keydown',function(event){
   else if(keyboard.eventMatches(event,"D")){ 
     (key == "D")? init_animation(p1,p0,time_length) : (init_animation(0,Math.PI/4,1), key = "D");}
   else if(keyboard.eventMatches(event," ")){ 
-    jumpCut = !jumpCut; // toggle jump cut
+    jumpCut = !jumpCut;
   }
   });
 
