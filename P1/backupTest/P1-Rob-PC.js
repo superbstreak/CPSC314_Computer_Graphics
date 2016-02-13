@@ -74,7 +74,6 @@ function makeCube() {
 // Variables
 // ===============================================================================
 
-var reversible = true;
 var numberOfTentical = 9;
 var numberOfClaws = 5;
 var tentLAngleX = [-40,-30,-20,-10,0,10,20,30,40];
@@ -503,7 +502,8 @@ var actionQueue = {
   V: false,
   S: false,
   N: false,
-  D: false};
+  D: false,
+  GodZillaMode: false};
 var jumpCut = false;
 
 // actionManager: keep track of which key has been pressed and dir of action
@@ -511,7 +511,7 @@ function actionManager(keyHit) {
   var result = {toggle: false, keyState: ""};
   switch (keyHit) {
     case "U":
-      if (actionQueue.E && reversible) {
+      if (actionQueue.E) {
         result.toggle = true;
         result.keyState = "E";
         actionQueue.U = false;
@@ -523,7 +523,7 @@ function actionManager(keyHit) {
       }
     break;
     case "E":
-      if (actionQueue.U && reversible) {
+      if (actionQueue.U) {
           result.toggle = true;
           result.keyState = "U";
           actionQueue.U = false;
@@ -535,7 +535,7 @@ function actionManager(keyHit) {
       }
     break;
     case "H":
-      if (actionQueue.G && reversible) {
+      if (actionQueue.G) {
         result.toggle = true;
         result.keyState = "G";
         actionQueue.H = false;
@@ -547,7 +547,7 @@ function actionManager(keyHit) {
       }
     break;
     case "G":
-      if (actionQueue.H && reversible) {
+      if (actionQueue.H) {
         result.toggle = true;
         result.keyState = "H";
         actionQueue.H = false;
@@ -559,7 +559,7 @@ function actionManager(keyHit) {
       }
     break;
     case "T":
-      if (actionQueue.V && reversible) {
+      if (actionQueue.V) {
         result.toggle = true;
         result.keyState = "V";
         actionQueue.T = false;
@@ -571,7 +571,7 @@ function actionManager(keyHit) {
       }
     break;
     case "V":
-      if (actionQueue.T && reversible) {
+      if (actionQueue.T) {
         result.toggle = true;
         result.keyState = "T";
         actionQueue.T = false;
@@ -596,6 +596,11 @@ function actionManager(keyHit) {
       result.toggle = actionQueue.D;
       result.keyState = "D";
       actionQueue.D = !result.toggle;
+    break;
+    case "A":
+      result.toggle = actionQueue.GodZillaMode;
+      result.keyState = "A";
+      actionQueue.GodZillaMode = !result.toggle;
     break;
     default:
       console.log("Unkown");
@@ -624,7 +629,7 @@ function init_animation(p_start,p_end,t_length,dirToggle){
 function updateBody() {
   switch(true)
   {
-      case((key == "U" || key == "E") && animate):
+      case((key == "U" || key == "E") && animate && !actionQueue.GodZillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -634,7 +639,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performTorsoRotation((key ==  "U")? -p : p);
       break;
-      case ((key == "H" || key == "G") && animate):
+      case ((key == "H" || key == "G") && animate && !actionQueue.GodZillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -644,7 +649,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame 
         performHeadRotation((key ==  "H")? -p : p);
       break;
-      case ((key == "T" || key == "V") && animate):
+      case ((key == "T" || key == "V") && animate && !actionQueue.GodZillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -654,7 +659,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performTailRotation((key ==  "V")? -p : p);
       break;
-      case ((key == "N") && animate):
+      case ((key == "N") && animate && !actionQueue.GodZillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -664,7 +669,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performFanOut(p);
       break;
-      case ((key == "S") && animate):
+      case ((key == "S") && animate && !actionQueue.GodZillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -675,7 +680,7 @@ function updateBody() {
         z = (jumpCut)? 0 : ((0 - Math.PI/4)*((time-time_start)/time_length) + Math.PI/4); // sub frame
         performSwin(p, z);
       break;
-      case ((key == "D") && animate):
+      case ((key == "D") && animate && !actionQueue.GodZillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -685,10 +690,33 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performDig(p);
       break;
+      case ((key == "A") && animate):
+        var time = clock.getElapsedTime(); // t seconds passed since the clock started.
+        if (time > time_end){
+          p = p1;
+          animate = false;
+          break;
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        perfromGodzillaMode(p);
+      break;
     default:
       break;
   }
   drawMole(); // update model
+}
+
+function toggleMovieMode(toggle) {
+
+}
+
+function perfromGodzillaMode(sp) {
+  toggleMovieMode(actionQueue.GodZillaMode);
+  if (actionQueue.GodZillaMode) {
+
+  } else {
+
+  }
 }
 
 // LISTEN TO KEYBOARD
@@ -763,9 +791,11 @@ keyboard.domElement.addEventListener('keydown',function(event){
   else if(keyboard.eventMatches(event," ")){ 
     jumpCut = !jumpCut; // toggle jump cut
   }
-  else if(keyboard.eventMatches(event,"R")){ 
-    reversible = !reversible; // toggle reversible
-  }
+  else if(keyboard.eventMatches(event,"A")){
+    decision = actionManager("A"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/2,1,toggle));}
   });
 
 // SETUP UPDATE CALL-BACK

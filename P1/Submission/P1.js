@@ -73,7 +73,7 @@ function makeCube() {
 // ===============================================================================
 // Variables
 // ===============================================================================
-
+var godzillaMode = false;
 var reversible = true;
 var numberOfTentical = 9;
 var numberOfClaws = 5;
@@ -81,7 +81,20 @@ var tentLAngleX = [-40,-30,-20,-10,0,10,20,30,40];
 var tentLAngleY = [0,10,20,30,40,30,20,10,0];
 var tentRAngleX = [40,30,20,10,0,-10,-20,-30,-40];
 var tentRAngleY = [0,-10,-20,-30,-40,-30,-20,-10,0];
+var numberOfBuilding = 10;
+var building = [];
+var buildingMatrix = [];
+var numOfPlanes = 5;
+var planeBody = [];
+var planeWing = [];
+var planeTail = [];
 
+var matrixPlaneBody = [];
+var matrixPlaneWing = [];
+var matrixPlaneTail = [];
+var xmatrixPlaneBody = [];
+var xmatrixPlaneWing = [];
+var xmatrixPlaneTail = [];
 var xmatrixTorso = new THREE.Matrix4().set(1,0,0,0, 0,1,0,3.5, 0,0,1,0, 0,0,0,1);
 var xmatrixHead = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,5.4, 0,0,0,1);
 var xmatrixTail = new THREE.Matrix4().set(1,0,0,0, 0,1,0,-1, 0,0,1,-4, 0,0,0,1);
@@ -186,6 +199,9 @@ var matrixTentSmallLeftUpper = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,0.2, 0,0
 var matrixTentSmallLeftLower = new THREE.Matrix4().set(1,0,0,0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
 var matrixTentSmallRightUpper = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,0.2, 0,0,1,1, 0,0,0,1);
 var matrixTentSmallRightLower = new THREE.Matrix4().set(1,0,0,-0.2, 0,1,0,-0.2, 0,0,1,1, 0,0,0,1);
+
+var wingMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,-1, 0,0,0,1);
+var tailMatrix = new THREE.Matrix4().set(1,0,0,0, 0,1,0,0, 0,0,1,2, 0,0,0,1);
 
 // ===============================================================================
 // Custom Functions
@@ -450,6 +466,134 @@ function performDig(p) {
   }
 }
 
+
+function performAttack(cp) {
+  var radius = 0.05;
+  rad = (cp*Math.PI)/180;
+  var deltaX = radius*Math.cos(rad);
+  var deltaY = radius*Math.sin(rad);
+  var path = translation(deltaY,0,0);
+  for (i=0; i<numOfPlanes; i++) {
+    xmatrixPlaneBody[i] = mulMatrix(xmatrixPlaneBody[i], path);
+  }
+  drawPlane();
+}
+
+
+function performGodzilla(cp) {
+  if (actionQueue.Z) { // start it
+    summonBuildings();
+    performStandUp(cp); 
+    performDig(-cp);
+  } 
+}
+
+
+function summonPlanes() {
+  planeBody = [];
+  planeWing = [];
+  planeTail = [];
+
+  matrixPlaneBody = [];
+  matrixPlaneWing = [];
+  matrixPlaneTail = [];
+
+  xmatrixPlaneBody = [];
+  xmatrixPlaneWing = [];
+  xmatrixPlaneTail = [];
+
+  var main = makeCube();
+  main.applyMatrix(scale(1,1,7));
+  var wing = makeCube();
+  wing.applyMatrix(scale(10,0.25,1));
+  var tail = makeCube();
+  tail.applyMatrix(scale(5,0.25,1));
+
+  var heights = randomBuildingHeight(numOfPlanes);
+  for (i=0; i<numOfPlanes; i++) {
+    planeBody.push(new THREE.Mesh(main,normalMaterial));
+    planeWing.push(new THREE.Mesh(wing,normalMaterial));
+    planeTail.push(new THREE.Mesh(tail,normalMaterial));
+    var matB = new THREE.Matrix4().set(1,0,0,randomBuildingPosition().RX, 0,1,0,heights[i]+20, 0,0,1,randomBuildingPosition().RZ, 0,0,0,1);
+    matrixPlaneBody.push(matB);
+    xmatrixPlaneBody.push(matB);
+    matrixPlaneWing.push(wingMatrix);
+    xmatrixPlaneWing.push(wingMatrix);
+    matrixPlaneTail.push(tailMatrix);
+    xmatrixPlaneTail.push(tailMatrix);
+  }
+  drawPlane();
+}
+
+function drawPlane() {
+  for (i=0; i<numOfPlanes; i++) {
+    planeBody[i].setMatrix(xmatrixPlaneBody[i]);
+    planeWing[i].setMatrix(mulMatrix(xmatrixPlaneBody[i],matrixPlaneWing[i]));
+    planeTail[i].setMatrix(mulMatrix(xmatrixPlaneBody[i],matrixPlaneTail[i]));
+  }
+  addListToScene(planeBody);
+  addListToScene(planeWing);
+  addListToScene(planeTail);
+}
+
+
+function randomBuildingPosition() {
+  var randX = Math.round(Math.random()*100) + 1;
+  var randZ = Math.round(Math.random()*100) + 1;
+  if (Math.abs(randX - 50) < 5) {
+    randX = randX + 15;
+  }
+  return {RX: randX - 50, RZ: randZ - 50};
+}
+
+
+function randomBuildingHeight(num) {
+  var height = [];
+  for (i=0; i< num; i++){
+    height.push(Math.random()*9);
+  }
+  return height;
+}
+
+
+function summonBuildings() {
+  numberOfBuilding = 30;
+  building = [];
+  buildingMatrix = [];
+  var heights = randomBuildingHeight(numberOfBuilding);
+  for (i=0; i<numberOfBuilding; i++) {
+    var geometryBuilding = makeCube();
+    geometryBuilding.applyMatrix(scale(Math.random()*3,heights[i],Math.random()*3))
+    building.push(new THREE.Mesh(geometryBuilding,normalMaterial));
+  }
+  for (i=0; i<numberOfBuilding; i++) {
+    buildingMatrix.push(new THREE.Matrix4().set(1,0,0,randomBuildingPosition().RX, 0,1,0,heights[i]/2, 0,0,1,randomBuildingPosition().RZ, 0,0,0,1));
+  }
+  for (i=0; i<numberOfBuilding; i++) {
+    building[i].setMatrix(buildingMatrix[i]);
+  }
+  addListToScene(building);
+}
+
+
+function performStandUp(p) {
+  var rotateZ = rotation(1,p, false);
+  xmatrixTorso = mulMatrix(matrixTorso,rotateZ);
+
+  var rotatePaw = rotation(1,-p/2,false);
+  var rotateCalw = rotation(1,-p/1.5, false);
+  xmatrixBackLegRight = mulMatrix(matrixBackLegRight, rotatePaw);
+  xmatrixBackLegLeft = mulMatrix(matrixBackLegLeft, rotatePaw);
+  for (i = 0; i < numberOfClaws; i++) {
+    xmatrixClawBackRight[i] = mulMatrix(matrixClawBackRight[i], rotateCalw);
+    xmatrixClawBackLeft[i] = mulMatrix(matrixClawBackLeft[i], rotateCalw);
+  }
+}
+
+
+function cleanUpAndReset() {
+  window.location.reload(false); 
+}
 // ===============================================================================       
 
 // CREATE BODY
@@ -503,7 +647,9 @@ var actionQueue = {
   V: false,
   S: false,
   N: false,
-  D: false};
+  D: false,
+  Z: false,
+  B: false};
 var jumpCut = false;
 
 // actionManager: keep track of which key has been pressed and dir of action
@@ -597,6 +743,16 @@ function actionManager(keyHit) {
       result.keyState = "D";
       actionQueue.D = !result.toggle;
     break;
+    case "A":
+      result.toggle = actionQueue.Z;
+      result.keyState = "A";
+      actionQueue.Z = !result.toggle;
+    break;
+    case "B":
+      result.toggle = actionQueue.B;
+      result.keyState = "B";
+      actionQueue.B = !result.toggle;
+    break;
     default:
       console.log("Unkown");
     break;
@@ -624,7 +780,7 @@ function init_animation(p_start,p_end,t_length,dirToggle){
 function updateBody() {
   switch(true)
   {
-      case((key == "U" || key == "E") && animate):
+      case((key == "U" || key == "E") && animate && !godzillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -634,7 +790,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performTorsoRotation((key ==  "U")? -p : p);
       break;
-      case ((key == "H" || key == "G") && animate):
+      case ((key == "H" || key == "G") && animate && !godzillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -644,7 +800,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame 
         performHeadRotation((key ==  "H")? -p : p);
       break;
-      case ((key == "T" || key == "V") && animate):
+      case ((key == "T" || key == "V") && animate && !godzillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -654,7 +810,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performTailRotation((key ==  "V")? -p : p);
       break;
-      case ((key == "N") && animate):
+      case ((key == "N") && animate && !godzillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -664,7 +820,7 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performFanOut(p);
       break;
-      case ((key == "S") && animate):
+      case ((key == "S") && animate && !godzillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -675,7 +831,7 @@ function updateBody() {
         z = (jumpCut)? 0 : ((0 - Math.PI/4)*((time-time_start)/time_length) + Math.PI/4); // sub frame
         performSwin(p, z);
       break;
-      case ((key == "D") && animate):
+      case ((key == "D") && animate && !godzillaMode):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
@@ -685,11 +841,40 @@ function updateBody() {
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
         performDig(p);
       break;
+      case ((key == "A") && animate):
+        var time = clock.getElapsedTime(); // t seconds passed since the clock started.
+        if (time > time_end){
+          p = p1;
+          p1 = p0;
+          p0 = p;
+          time_start = time;
+          time_end = time_end + time_length;
+          animate = false;
+          break;
+        } 
+        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
+        performGodzilla(-p);
+      break;
+      case ((key == "B") && animate && godzillaMode):
+        var time = clock.getElapsedTime(); // t seconds passed since the clock started.
+        p =  (360*((time-time_start)/time_length)); // current frame
+        performAttack(p);
+      break;
     default:
       break;
   }
   drawMole(); // update model
 }
+
+
+
+
+
+
+
+
+
+
 
 // LISTEN TO KEYBOARD
 // Hint: Pay careful attention to how the keys already specified work!
@@ -766,6 +951,24 @@ keyboard.domElement.addEventListener('keydown',function(event){
   else if(keyboard.eventMatches(event,"R")){ 
     reversible = !reversible; // toggle reversible
   }
+  else if(keyboard.eventMatches(event,"A")){
+    decision = actionManager("A"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    if (!toggle) {
+      godzillaMode = true;
+      numOfPlanes = Math.round(Math.random()*20) + 1;
+      summonPlanes();
+    } else {
+      godzillaMode = false;
+      cleanUpAndReset();
+    }
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/3,1,toggle));}
+  else if(keyboard.eventMatches(event,"B")){
+    decision = actionManager("B"); 
+    toggle = decision.toggle;
+    key = decision.keyState;
+    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/3,1,toggle));}
   });
 
 // SETUP UPDATE CALL-BACK

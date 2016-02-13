@@ -450,6 +450,72 @@ function performDig(p) {
   }
 }
 
+// EXPERIMENT
+function prettyTailGeo(sX, sY, sZ) {
+  var tailxxx = [];
+  for (i = 0; i < 50; i++) {
+    var thisTent  = makeCube();
+    thisTent.applyMatrix(scale(sX, sY, sZ));
+    var tent = new THREE.Mesh(thisTent,normalMaterial);
+    tailxxx.push(tent);
+  }
+  return tailxxx;
+}
+
+function prettyTailMatrix(x,y,z) {
+  var tailMatrixX = [];
+  for (i = 0; i < 50; i++) {
+    var angle = (360/50)*(i+1); // 180/9
+    var yspacing = Math.cos(angle*Math.PI/180);
+    var xspacing = Math.sin(angle*Math.PI/180);;
+    tailMatrixX.push(new THREE.Matrix4().set(1,0,0,x*xspacing, 0,1,0,y*yspacing, 0,0,1,z, 0,0,0,1));
+  }
+  return tailMatrixX;
+}
+
+function populatePrettyTail() {
+  var tailAll = [];
+  var tailMatrix = [];
+
+  var tail1 = prettyTailGeo(0.15, 0.15, 4);
+  var tail2 = prettyTailGeo(0.13,0.13, 2);
+  var tail3 = prettyTailGeo(0.1, 0.1, 2);
+  var tail4 = prettyTailGeo(0.07, 0.07, 2);
+  var tail5 = prettyTailGeo(0.05, 0.05, 2);
+  var tail6 = prettyTailGeo(0.03, 0.03, 2);
+  var tail7 = prettyTailGeo(0.01, 0.01, 2);
+
+  tailAll.push(tail1);
+  tailAll.push(tail2);
+  tailAll.push(tail3);
+  tailAll.push(tail4);
+  tailAll.push(tail5);
+  tailAll.push(tail6);
+  tailAll.push(tail7);
+
+  tailMatrix.push(prettyTailMatrix(0.3,0.3,-4));
+  tailMatrix.push(prettyTailMatrix(0.25,0.25,-5));
+  tailMatrix.push(prettyTailMatrix(0.2,0.2,-6));
+  tailMatrix.push(prettyTailMatrix(0.15,0.15,-7));
+  tailMatrix.push(prettyTailMatrix(0.1,0.1,-8));
+  tailMatrix.push(prettyTailMatrix(0.05,0.05,-9));
+  tailMatrix.push(prettyTailMatrix(0.01,0.01,-10));
+
+  setToRELMatrix(tailAll[1], tailMatrix[1], matrixTorso, 50);
+  setToRELMatrix(tailAll[2], tailMatrix[2], matrixTorso, 50);
+  setToRELMatrix(tailAll[3], tailMatrix[3], matrixTorso, 50);
+  setToRELMatrix(tailAll[4], tailMatrix[4], matrixTorso, 50);
+  setToRELMatrix(tailAll[5], tailMatrix[5], matrixTorso, 50);
+  setToRELMatrix(tailAll[6], tailMatrix[6], matrixTorso, 50);
+  
+  addListToScene(tailAll[1]);
+  addListToScene(tailAll[2]);
+  addListToScene(tailAll[3]);
+  addListToScene(tailAll[4]);
+  addListToScene(tailAll[5]);
+  addListToScene(tailAll[6]);
+}
+
 // ===============================================================================       
 
 // CREATE BODY
@@ -492,7 +558,7 @@ var time_length; // total time of animation
 var time_start; // start time of animation
 var time_end; // end time of animation
 var p; // current frame
-var animate = false; // animate?
+var animate = true; // animate?
 var swimCounter = 0;
 var actionQueue = {
   U: false,
@@ -505,6 +571,17 @@ var actionQueue = {
   N: false,
   D: false};
 var jumpCut = false;
+var actionState = {
+  U: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  E: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  H: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  G: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  T: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  V: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  S: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  N: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0},
+  D: {enable: false, startP: 0, endP: 0, currP: 0, startT: 0, endT: 0}
+};
 
 // actionManager: keep track of which key has been pressed and dir of action
 function actionManager(keyHit) {
@@ -515,7 +592,7 @@ function actionManager(keyHit) {
         result.toggle = true;
         result.keyState = "E";
         actionQueue.U = false;
-        actionQueue.E = false;
+        actionQueue.E = true;
       } else {
         result.toggle = actionQueue.U;
         result.keyState = "U";
@@ -526,7 +603,7 @@ function actionManager(keyHit) {
       if (actionQueue.U && reversible) {
           result.toggle = true;
           result.keyState = "U";
-          actionQueue.U = false;
+          actionQueue.U = true;
           actionQueue.E = false;
       } else {
           result.toggle = actionQueue.E;
@@ -608,37 +685,121 @@ function actionManager(keyHit) {
 // Initializes parameters and sets animate flag to true.
 // Input: start position or angle, end position or angle, and total time of animation.
 function init_animation(p_start,p_end,t_length,dirToggle){
-  p0 = p_start;
-  p1 = p_end;
-  if (dirToggle && p_start == 0) {
-    p0 = p_end;
-    p1 = p_start;
-  }
-  time_length = t_length;
-  time_start = clock.getElapsedTime();
-  time_end = time_start + time_length;
-  animate = true; // flag for animation
+    p0 = p_start;
+    p1 = p_end;
+    if (dirToggle && p_start == 0) {
+      p0 = p_end;
+      p1 = p_start;
+    }
+    time_length = t_length;
+    time_start = clock.getElapsedTime();
+    time_end = time_start + time_length;
+    animate = true; // flag for animation
   return;
+}
+
+function start_animation(key, spos, epos, toggle) {
+  var sp = spos;
+  var ep = epos;
+  var st = clock.getElapsedTime();
+  if (toggle && sp == 0) {
+      sp = epos;
+      ep = spos;
+    }
+  switch(key) {
+    case "U":
+      actionState.U.enable = true;
+      actionState.U.startP = sp;
+      actionState.U.endP = ep;
+      actionState.U.startT = st;
+      actionState.U.endT = st + 1;
+    break;
+    case "E": 
+      actionState.E.enable = true;
+      actionState.E.startP = sp;
+      actionState.E.endP = ep;
+      actionState.E.startT = st;
+      actionState.E.endT = st + 1;
+    break;
+    case "H":
+      actionState.H.enable = true;
+      actionState.H.startP = sp;
+      actionState.H.endP = ep;
+      actionState.H.startT = st;
+      actionState.H.endT = st + 1;
+    break;
+    case "G": 
+      actionState.G.enable = true;
+      actionState.G.startP = sp;
+      actionState.G.endP = ep;
+      actionState.G.startT = st;
+      actionState.G.endT = st + 1;
+    break;
+    case "T": 
+      actionState.T.enable = true;
+      actionState.T.startP = startP;
+      actionState.T.endP = ep;
+      actionState.T.startT = st;
+      actionState.T.endT = st + 1;
+    break;
+    case "V": 
+      actionState.V.enable = true;
+      actionState.V.startP = sp;
+      actionState.V.endP = ep;
+      actionState.V.startT = st;
+      actionState.V.endT = st + 1;
+    break;
+    case "S": 
+      actionState.S.enable = true;
+      actionState.S.startP = sp;
+      actionState.S.endP = ep;
+      actionState.S.startT = st;
+      actionState.S.endT = st + 1;
+    break;
+    case "N": 
+      actionState.N.enable = true;
+      actionState.N.startP = sp;
+      actionState.N.endP = ep;
+      actionState.N.startT = st;
+      actionState.N.endT = st + 1;
+    break;
+    case "D": 
+      actionState.D.enable = true;
+      actionState.D.startP = sp;
+      actionState.D.endP = ep;
+      actionState.D.startT = st;
+      actionState.D.endT = st + 1;
+    break;
+  }
 }
 
 function updateBody() {
   switch(true)
   {
-      case((key == "U" || key == "E") && animate):
+      case(actionQueue.U  && actionState.U.enable):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
-        if (time > time_end){
-          p = p1;
-          animate = false;
+        if (time > actionState.U.endT) {
+          actionState.U.currP = actionState.U.endP;
+          actionState.U.enable = false;
           break;
-        } 
-        p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame
-        performTorsoRotation((key ==  "U")? -p : p);
+        }
+        actionState.U.currP = (jumpCut)? actionState.U.endP : ((actionState.U.endP - actionState.U.startP)*((time-actionState.U.startT)/1) + actionState.U.startP); // current frame 
+        performTorsoRotation(-actionState.U.currP);
+      break;
+      case(actionQueue.E && actionState.E.enable):
+        var time = clock.getElapsedTime(); // t seconds passed since the clock started.
+        if (time > actionState.E.endT) {
+          actionState.E.currP = actionState.E.endP;
+          actionState.E.enable = false;
+          break;
+        }
+        actionState.E.currP = (jumpCut)? actionState.E.endP : ((actionState.E.endP - actionState.E.startP)*((time-actionState.E.startT)/1) + actionState.E.startP); // current frame 
+        performTorsoRotation(actionState.E.currP);
       break;
       case ((key == "H" || key == "G") && animate):
         var time = clock.getElapsedTime(); // t seconds passed since the clock started.
         if (time > time_end){
           p = p1;
-          animate = false;
           break;
         } 
         p = (jumpCut)? p1 : ((p1 - p0)*((time-time_start)/time_length) + p0); // current frame 
@@ -712,37 +873,37 @@ keyboard.domElement.addEventListener('keydown',function(event){
     decision = actionManager("U");
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle): (init_animation(0,Math.PI/4,1,toggle));}  
+    (toggle)? start_animation("U",Math.PI/4,0,toggle): (start_animation("U",0,Math.PI/4,toggle));}  
   else if(keyboard.eventMatches(event,"E")){ 
     decision = actionManager("E");
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));} 
+    (toggle)? start_animation("E",Math.PI/4,0,toggle) : (start_animation("E",0,Math.PI/4,toggle));} 
   else if(keyboard.eventMatches(event,"H")){
     decision = actionManager("H"); 
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+    (toggle)? init_animation(Math.PI/4,0,1,toggle): (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event,"G")){
     decision = actionManager("G"); 
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+    (toggle)? init_animation(Math.PI/4,0,1,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event,"T")){
     decision = actionManager("T"); 
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+    (toggle)? init_animation(Math.PI/4,0,1,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event,"V")){
     decision = actionManager("V"); 
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+    (toggle)? init_animation(Math.PI/4,0,1,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event,"N")){
     decision = actionManager("N"); 
     toggle = decision.toggle;
     key = decision.keyState;
-    (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
+    (toggle)? init_animation(Math.PI/4,0,1,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event,"S")){
     decision = actionManager("S");
     toggle = decision.toggle;
@@ -751,7 +912,7 @@ keyboard.domElement.addEventListener('keydown',function(event){
       (init_animation(0,Math.PI/4,1,toggle));
       swimCounter += 1;
     } else {
-      (init_animation(p1,p0,time_length,toggle));
+      (init_animation(Math.PI/4,0,1,toggle));
       swimCounter = 0;
     }
   }
@@ -762,9 +923,6 @@ keyboard.domElement.addEventListener('keydown',function(event){
     (toggle)? init_animation(p1,p0,time_length,toggle) : (init_animation(0,Math.PI/4,1,toggle));}
   else if(keyboard.eventMatches(event," ")){ 
     jumpCut = !jumpCut; // toggle jump cut
-  }
-  else if(keyboard.eventMatches(event,"R")){ 
-    reversible = !reversible; // toggle reversible
   }
   });
 
