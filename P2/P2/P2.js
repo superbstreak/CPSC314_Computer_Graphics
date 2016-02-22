@@ -174,8 +174,10 @@ var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 
 //========================================================================================
 // PRE DEFINED VARIABLE
+// credit
+// data: http://www.windows2universe.org/our_solar_system/planets_table.html
 //========================================================================================
-var sunBaseSize = 500;
+var sunBasedScaling = 500;
 
 // Create Solar System
 var planetR = { sun: 696000,
@@ -203,98 +205,53 @@ var planetDist = {
 	earthMoon: 10 // from earth
 };
 
-// DEBUG
-// var planetDist = {
-// 	sun: 0, 
-// 	mercury: 20,
-// 	venus: 30,
-// 	earth: 40,
-// 	mars: 50,
-// 	jupiter: 60,
-// 	staturn: 70,
-// 	urans: 80,
-// 	neptune: 90,
-// 	earthMoon: 10 // from earth
-// };
-
 var planetRelativeR = {
 	sun: 10,
-	mercury: (planetR.mercury/planetR.sun)*sunBaseSize,
-	venus: (planetR.venus/planetR.sun)*sunBaseSize,
-	earth: (planetR.earth/planetR.sun)*sunBaseSize,
-	mars: (planetR.mars/planetR.sun)*sunBaseSize,
-	jupiter: (planetR.jupiter/planetR.sun)*sunBaseSize,
-	staturn: (planetR.staturn/planetR.sun)*sunBaseSize,
-	urans: (planetR.urans/planetR.sun)*sunBaseSize,
-	neptune: (planetR.neptune/planetR.sun)*sunBaseSize, 
+	mercury: (planetR.mercury/planetR.sun)*sunBasedScaling,
+	venus: (planetR.venus/planetR.sun)*sunBasedScaling,
+	earth: (planetR.earth/planetR.sun)*sunBasedScaling,
+	mars: (planetR.mars/planetR.sun)*sunBasedScaling,
+	jupiter: (planetR.jupiter/planetR.sun)*sunBasedScaling,
+	staturn: (planetR.staturn/planetR.sun)*sunBasedScaling,
+	urans: (planetR.urans/planetR.sun)*sunBasedScaling,
+	neptune: (planetR.neptune/planetR.sun)*sunBasedScaling, 
 	earthMoon: (planetR.earthMoon/planetR.earth)*5
 };
 
-// DEBUG
-// var planetRelativeR = {
-// 	sun: 10,
-// 	mercury: 5,
-// 	venus: 5,
-// 	earth: 5,
-// 	mars: 5,
-// 	jupiter: 10,
-// 	staturn: 5,
-// 	urans: 5,
-// 	neptune: 5,
-// 	earthMoon: 1
-// };
-
-var planetOrbitSpeed = {
-	mercury: 0.25,
-	venus: 0.2,
-	earth: 0.15,
-	mars: 0.1,
-	jupiter: 0.075,
-	staturn: 0.05,
-	urans: 0.025,
-	neptune: 0.01,
+var planetOrbitSpeed = {	// speed relative to earth
+	mercury: 1.61,
+	venus: 1.18,
+	earth: 1,
+	mars: 0.81,
+	jupiter: 0.44,
+	staturn: 0.32,
+	urans: 0.23,
+	neptune: 0.18,
 	earthMoon: 1
 };
 
-
 var planetRoatationDelta = {
-	sun: 0.05, 
-	mercury: 0.05,
-	venus: 0.05,
-	earth: 0.05,
-	mars: 0.05,
-	jupiter: 0.05,
-	staturn: 0.05,
-	urans: 0.05,
-	neptune: 0.05
+	sun: 0.041, 
+	mercury: 0.0171,
+	venus: -0.00412,	// retrograde rotation
+	earth: 1,
+	mars: 0.971,
+	jupiter: 2.439,
+	staturn: 2.273,
+	urans: -1.389,	// retrograde rotation
+	neptune: 1.389
 };
 
-//========================================================================================
-// CUSTOM FUNCTIONS
-//========================================================================================
- 
-function rotateAboutAxis(object, axis, degree) {
-	var rad = (degree*Math.PI)/180;
-	var ident = new THREE.Matrix4();
-	switch (axis) {
-		case "x":
-			ident.makeRotationX(rad);
-		break;
-		case "y":
-			ident.makeRotationY(rad);
-		break;
-		case "z":
-			ident.makeRotationZ(rad);
-		break;
-		default:
-		break;
-	}
-	object.setMatrix(mulMatrix(object.matrix,ident));
-}
-
-function mulMatrix(matrix,app) {
-  return new THREE.Matrix4().multiplyMatrices(matrix,app);
-}
+var inclinationAxis = { // converted to rad
+	mercury: 0,
+	venus: 3.096,
+	earth: 0.4093,
+	mars: 0.4185,
+	jupiter: 0.054,
+	staturn: 0.467,
+	urans: 1.709,
+	neptune: 0.503
+};
 
 //========================================================================================
 // GEOMETRY
@@ -337,24 +294,35 @@ var geometryMothership = new THREE.CylinderGeometry(6, 1, 5.5, 32 );
 
 //========================================================================================
 // MATRERIAL
+// credit: image source: https://github.com/jeromeetienne/threex.planets
 //========================================================================================
-
-// sun
-// var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 var material = new THREE.MeshNormalMaterial();
 
+// sun
+// var materialSun = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+var materialSun = new THREE.MeshPhongMaterial({emissive:0xf2b74c, map:THREE.ImageUtils.loadTexture('./texture/sun/sunmap.jpg')});
+
 // planets
-var materialMercury = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-var materialVenus = new THREE.MeshBasicMaterial( {color: 0xff9900} );
-var materialEarth = new THREE.MeshBasicMaterial( {color: 0x33cc33} );
-var materialMars = new THREE.MeshBasicMaterial( {color: 0x0066ff} );
-var materialJupiter = new THREE.MeshBasicMaterial( {color: 0x9900cc} );
-var materialSaturn = new THREE.MeshBasicMaterial( {color: 0xff33cc} );
-var materialUrans = new THREE.MeshBasicMaterial( {color: 0x996633} );
-var materialNeptune = new THREE.MeshBasicMaterial( {color: 0x00ffff} );
+// var materialMercury = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+var materialMercury = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/mercury/mercurymap.jpg')});
+// var materialVenus = new THREE.MeshBasicMaterial( {color: 0xff9900} );
+var materialVenus = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/venus/venusmap.jpg')});
+// var materialEarth = new THREE.MeshBasicMaterial( {color: 0x33cc33} );
+var materialEarth = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/earth/earthmap.jpg')});
+// var materialMars = new THREE.MeshBasicMaterial( {color: 0x0066ff} );
+var materialMars = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/mars/marsmap.jpg')});
+// var materialJupiter = new THREE.MeshBasicMaterial( {color: 0x9900cc} );
+var materialJupiter = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/jupiter/jupitermap.jpg')});
+// var materialSaturn = new THREE.MeshBasicMaterial( {color: 0xff33cc} );
+var materialSaturn = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/saturn/saturnmap.jpg')});
+// var materialUrans = new THREE.MeshBasicMaterial( {color: 0x996633} );
+var materialUrans = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/uranus/uranusmap.jpg')});
+// var materialNeptune = new THREE.MeshBasicMaterial( {color: 0x00ffff} );
+var materialNeptune = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/neptune/neptunemap.jpg')});
 
 // moon
-var materialEarthMoon = new THREE.MeshBasicMaterial( {color: 0x555555} );
+// var materialEarthMoon = new THREE.MeshBasicMaterial( {color: 0x555555} );
+var materialEarthMoon = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture('./texture/earth/moonmap.jpg')});
 
 // circle material
 var oribitalPathMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
@@ -362,12 +330,13 @@ var oribitalPathMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: 
 // saturn's ring
 var materialSaturnRing = new THREE.MeshBasicMaterial( {color: 0x996633, side: THREE.DoubleSide} );
 
+
 //========================================================================================
 // MESH
 //========================================================================================
 
 // sun
-var sun = new THREE.Mesh( geometry, material );
+var sun = new THREE.Mesh( geometry, materialSun );
 
 // planets
 var mercury = new THREE.Mesh( geometryMercury, materialMercury );
@@ -403,6 +372,16 @@ var mothership = new THREE.Mesh(geometryMothership, material);
 //========================================================================================
 // MODIFY INIT POS
 //========================================================================================
+
+// planet inclination of axis
+mercury.rotation.x = inclinationAxis.mercury;
+venus.rotation.x = inclinationAxis.venus;
+earth.rotation.x = inclinationAxis.earth;
+mars.rotation.x = inclinationAxis.mars;
+jupiter.rotation.x = inclinationAxis.jupiter;
+staturn.rotation.x = inclinationAxis.staturn;
+urans.rotation.x = inclinationAxis.urans;
+neptune.rotation.x = inclinationAxis.neptune;
 
 // planets
 mercury.position.x = planetDist.mercury;
@@ -463,6 +442,40 @@ scene.add(staturn);
 scene.add(urans);
 scene.add(neptune);
 
+//========================================================================================
+// CUSTOM FUNCTIONS
+//========================================================================================
+ 
+function rotateAboutAxis(object, axis, degree) {
+	var rad = (degree*Math.PI)/180;
+	var ident = new THREE.Matrix4();
+	switch (axis) {
+		case "x":
+			ident.makeRotationX(rad);
+		break;
+		case "y":
+			ident.makeRotationY(rad);
+		break;
+		case "z":
+			ident.makeRotationZ(rad);
+		break;
+		default:
+		break;
+	}
+	object.setMatrix(mulMatrix(object.matrix,ident));
+}
+
+function mulMatrix(matrix,app) {
+  return new THREE.Matrix4().multiplyMatrices(matrix,app);
+}
+
+function spaceShipPerspective() {
+	if (isMothership) {
+		
+	} else {
+		
+	}
+}
 
 
 //========================================================================================
@@ -480,6 +493,9 @@ function updateSystem()
 		return;
 	}
 	// ANIMATE YOUR SOLAR SYSTEM HERE.
+
+	spaceShipPerspective();
+
 	// self rotation about its own y axis
 	var delta = clock.getDelta();
 
@@ -515,7 +531,7 @@ function updateSystem()
 	earthMoon.position.x = Math.sin(t*planetOrbitSpeed.earthMoon)*planetDist.earthMoon;
 	earthMoon.position.z = Math.cos(t*planetOrbitSpeed.earthMoon)*planetDist.earthMoon;
 
-	t += delta;
+	t += Math.PI/380;
 }
 
 //========================================================================================
