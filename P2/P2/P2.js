@@ -298,7 +298,7 @@ var material = new THREE.MeshNormalMaterial();
 
 // sun
 // var materialSun = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-var materialSun = new THREE.MeshPhongMaterial({emissive:0xf2b74c, map:THREE.ImageUtils.loadTexture('./texture/sun/sunmap.jpg')});
+var materialSun = new THREE.MeshPhongMaterial({emissive:0xf2b74c,map:THREE.ImageUtils.loadTexture('./texture/sun/sunmap.jpg')});
 
 // planets
 // var materialMercury = new THREE.MeshBasicMaterial( {color: 0xff0000} );
@@ -534,7 +534,7 @@ function changeStep(isIncrease) {
 	if (isIncrease) {
 
 	} else {
-		
+
 	}
 }
 
@@ -542,23 +542,23 @@ function changeCamera(axis, isIncrease) {
 	switch (axis) {
 		case "x":
 			if (isIncrease) {
-
+				(isMothership)? camera_MotherShip.position.x += 5:camera_ScoutShip.position.x += 5;
 			} else {
-
+				(isMothership)? camera_MotherShip.position.x += -5:camera_ScoutShip.position.x += -5;
 			}
 		break;
 		case "y":
 			if (isIncrease) {
-
+				(isMothership)? camera_MotherShip.position.y += 5:camera_ScoutShip.position.y += 5;
 			} else {
-				
+				(isMothership)? camera_MotherShip.position.y += -5:camera_ScoutShip.position.y += -5;
 			}
 		break;
 		case "z":
 			if (isIncrease) {
-
+				(isMothership)? camera_MotherShip.position.z += 5:camera_ScoutShip.position.z += 5;
 			} else {
-				
+				(isMothership)? camera_MotherShip.position.z += -5:camera_ScoutShip.position.z += -5;
 			}
 		break;
 	}
@@ -568,21 +568,21 @@ function changeLookAt(axis,isIncrease) {
 	switch (axis) {
 		case "x":
 			if (isIncrease) {
-
+				
 			} else {
-
+				
 			}
 		break;
 		case "y":
 			if (isIncrease) {
-
+				
 			} else {
 				
 			}
 		break;
 		case "z":
 			if (isIncrease) {
-
+				
 			} else {
 				
 			}
@@ -594,23 +594,23 @@ function changeUpVector(axis,isIncrease) {
 	switch (axis) {
 		case "x":
 			if (isIncrease) {
-
+				(isMothership)? camera_MotherShip.up.x += 5:camera_ScoutShip.up.x += 5;
 			} else {
-
+				(isMothership)? camera_MotherShip.up.x += -5:camera_ScoutShip.up.x += -5;
 			}
 		break;
 		case "y":
 			if (isIncrease) {
-
+				(isMothership)? camera_MotherShip.up.y += 5:camera_ScoutShip.up.y += 5;
 			} else {
-				
+				(isMothership)? camera_MotherShip.up.y += -5:camera_ScoutShip.up.y += -5;
 			}
 		break;
 		case "z":
 			if (isIncrease) {
-
+				(isMothership)? camera_MotherShip.up.z += 5:camera_ScoutShip.up.z += 5;
 			} else {
-				
+				(isMothership)? camera_MotherShip.up.z += -5:camera_ScoutShip.up.z += -5;
 			}
 		break;
 	}
@@ -653,74 +653,74 @@ function onKeyDown(event) {
   }
   else if (absoluteLookAtMode) {
   	  // Increase/Decrease camera x location with ’x’/’X’
-	  if(keyboard.eventMatches(event,"x")){
-	    changeCamera("x",true);
-	  }
-	  else if(keyboard.eventMatches(event,"shif+x")){
+  	  if(keyboard.eventMatches(event,"shift+x")){
 	    changeCamera("x",false);
 	  }
+	  else if(keyboard.eventMatches(event,"x")){
+	    changeCamera("x",true);
+	  }
 	  // Increase/Decrease camera y location with ’y’/’Y’
+	  else if(keyboard.eventMatches(event,"shift+y")){
+	    changeCamera("y",false);
+	  }
 	  else if(keyboard.eventMatches(event,"y")){
 	    changeCamera("y",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+y")){
-	    changeCamera("y",false);
-	  }
 	  // Increase/Decrease camera z location with ’z’/’Z’
+	  else if(keyboard.eventMatches(event,"shift+z")){
+	    changeCamera("z",false);
+	  }
 	  else if(keyboard.eventMatches(event,"z")){
 	    changeCamera("z",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+z")){
-	    changeCamera("z",false);
-	  }
 	  // Increase/Decrease the x location the camera is looking at ’a’/’A’
+	  else if(keyboard.eventMatches(event,"shift+a")){
+	    changeLookAt("x",false);
+	  }
 	  else if(keyboard.eventMatches(event,"a")){
 	    changeLookAt("x",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+a")){
-	    changeLookAt("x",false);
-	  }
 	  // Increase/Decrease the y location the camera is looking at ’b’/’B’
+	  else if(keyboard.eventMatches(event,"shift+b")){
+	    changeLookAt("y",false);
+	  }
 	  else if(keyboard.eventMatches(event,"b")){
 	    changeLookAt("y",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+b")){
-	    changeLookAt("y",false);
-	  }
 	  // Increase/Decrease the z location the camera is looking at ’c’/’C’
+	  else if(keyboard.eventMatches(event,"shift+c")){
+	    changeLookAt("z",false);
+	  }
 	  else if(keyboard.eventMatches(event,"c")){
 	    changeLookAt("z",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+c")){
-	    changeLookAt("z",false);
-	  }
 	  // Increase/Decrease the value of the up vector in the x coordinate ’d’/’D’
+	  else if(keyboard.eventMatches(event,"shift+d")){
+	    changeUpVector("x",false);
+	  }
 	  else if(keyboard.eventMatches(event,"d")){
 	    changeUpVector("x",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+d")){
-	    changeUpVector("x",false);
-	  }
 	  // Increase/Decrease the value of the up vector in the y coordinate ’e’/’E’
+	  else if(keyboard.eventMatches(event,"shift+e")){
+	    changeUpVector("y",false);
+	  }
 	  else if(keyboard.eventMatches(event,"e")){
 	    changeUpVector("y",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+e")){
-	    changeUpVector("y",false);
-	  }
 	  // Increase/Decrease the value of the up vector in the z coordinate ’f’/’F’
+	  else if(keyboard.eventMatches(event,"shift+f")){
+	    changeUpVector("z",false);
+	  }
 	  else if(keyboard.eventMatches(event,"f")){
 	    changeUpVector("z",true);
 	  }
-	  else if(keyboard.eventMatches(event,"shif+f")){
-	    changeUpVector("z",false);
-	  }
 	  // Increase/decrease step size (the increment moved by a keypress from above) with keys ’k/K’
+	  else if(keyboard.eventMatches(event,"shift+k")){
+	    changeStep(false);
+	  }
 	  else if(keyboard.eventMatches(event,"k")){
 	    changeStep(true);
-	  }
-	  else if(keyboard.eventMatches(event,"shif+k")){
-	    changeStep(false);
 	  }
   }
 }
