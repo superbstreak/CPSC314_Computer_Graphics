@@ -178,35 +178,21 @@ var grid = new THREE.Line(gridGeometry,gridMaterial,THREE.LinePieces);
 // data: http://www.windows2universe.org/our_solar_system/planets_table.html
 //========================================================================================
 var sunBasedScaling = 500;
+var saturnRingInner = 10;
+var saturnRingOutter = 40;
+var earthBasedScaling = 5;
 
 // Create Solar System
-var planetR = { sun: 696000,
-	mercury: 2440,
-	venus: 6052,
-	earth: 6371,
-	mars: 3389,
-	jupiter: 69911,
-	staturn: 58232,
-	urans: 25362,
-	neptune: 24622,
-	earthMoon: 1737
+var planetR = { sun: 696000, mercury: 2440, venus: 6052, earth: 6371, mars: 3389,
+	jupiter: 69911, staturn: 58232, urans: 25362, neptune: 24622, earthMoon: 1737
 };
 
-var planetDist = {
-	sun: 0, 
-	mercury: 57,
-	venus: 108,
-	earth: 150,
-	mars: 228,
-	jupiter: 779,
-	staturn: 1430,
-	urans: 2880,
-	neptune: 4500,
-	earthMoon: 10 // from earth
+var planetDist = {sun: 0, mercury: 57,venus: 108,earth: 150,mars: 228,
+	jupiter: 779,staturn: 1430,urans: 2880,neptune: 4500,earthMoon: 10 // from earth
 };
 
 var planetRelativeR = {
-	sun: 10,
+	sun: 5,
 	mercury: (planetR.mercury/planetR.sun)*sunBasedScaling,
 	venus: (planetR.venus/planetR.sun)*sunBasedScaling,
 	earth: (planetR.earth/planetR.sun)*sunBasedScaling,
@@ -215,19 +201,12 @@ var planetRelativeR = {
 	staturn: (planetR.staturn/planetR.sun)*sunBasedScaling,
 	urans: (planetR.urans/planetR.sun)*sunBasedScaling,
 	neptune: (planetR.neptune/planetR.sun)*sunBasedScaling, 
-	earthMoon: (planetR.earthMoon/planetR.earth)*5
+	earthMoon: (planetR.earthMoon/planetR.earth)*earthBasedScaling
 };
 
 var planetOrbitSpeed = {	// speed relative to earth
-	mercury: 1.61,
-	venus: 1.18,
-	earth: 1,
-	mars: 0.81,
-	jupiter: 0.44,
-	staturn: 0.32,
-	urans: 0.23,
-	neptune: 0.18,
-	earthMoon: 1
+	mercury: 1.61,venus: 1.18,earth: 1,mars: 0.81,
+	jupiter: 0.44,staturn: 0.32,urans: 0.23,neptune: 0.18,earthMoon: 1
 };
 
 var planetRoatationDelta = {
@@ -243,15 +222,33 @@ var planetRoatationDelta = {
 };
 
 var inclinationAxis = { // converted to rad
-	mercury: 0,
-	venus: 3.096,
-	earth: 0.4093,
-	mars: 0.4185,
-	jupiter: 0.054,
-	staturn: 0.467,
-	urans: 1.709,
-	neptune: 0.503
+	mercury: 0,venus: 3.096,earth: 0.4093,mars: 0.4185,
+	jupiter: 0.054,staturn: 0.467,urans: 1.709,neptune: 0.503
 };
+
+
+// debug ================= made to fit the entire screen
+sunBasedScaling = 25;
+saturnRingInner = 0.55;
+saturnRingOutter = 1.55;
+earthBasedScaling = 1.5;
+var planetDist = {sun: 0, mercury: 10,venus: 15,earth: 20,mars: 25,
+	jupiter: 30,staturn: 35,urans: 40,neptune: 45,earthMoon: 1.5 // from earth
+};
+var planetRelativeR = {
+	sun: 5,
+	mercury: (planetR.mercury/planetR.sun)*200,
+	venus: (planetR.venus/planetR.sun)*100,
+	earth: (planetR.earth/planetR.sun)*75,
+	mars: (planetR.mars/planetR.sun)*200,
+	jupiter: (planetR.jupiter/planetR.sun)*15,
+	staturn: (planetR.staturn/planetR.sun)*15,
+	urans: (planetR.urans/planetR.sun)*sunBasedScaling,
+	neptune: (planetR.neptune/planetR.sun)*sunBasedScaling, 
+	earthMoon: (planetR.earthMoon/planetR.earth)*earthBasedScaling
+};
+// =========================================================
+
 
 //========================================================================================
 // GEOMETRY
@@ -280,21 +277,22 @@ var geomertyVenusCircle = new THREE.RingGeometry(planetDist.venus-0.15, planetDi
 var geomertyEarthCircle = new THREE.RingGeometry(planetDist.earth-0.15, planetDist.earth+0.15,60);
 var geomertyMarsCircle = new THREE.RingGeometry(planetDist.mars-0.15, planetDist.mars+0.15,60);
 var geomertyJupiterCircle = new THREE.RingGeometry(planetDist.jupiter-0.15, planetDist.jupiter+0.15,60);
-var geomertySaturnCircle = new THREE.RingGeometry(planetDist.staturn-0.15, planetDist.staturn+0.15,60);
-var geomertyUransCircle = new THREE.RingGeometry(planetDist.urans-0.15, planetDist.urans+0.15,60);
-var geomertyNeptuneCircle = new THREE.RingGeometry(planetDist.neptune-0.15, planetDist.neptune+0.15,60);
-var geomertyEarthMoonCircle = new THREE.RingGeometry(planetDist.earthMoon-0.15, planetDist.earthMoon+0.15,60);
+var geomertySaturnCircle = new THREE.RingGeometry(planetDist.staturn-0.15, planetDist.staturn+0.15,120);
+var geomertyUransCircle = new THREE.RingGeometry(planetDist.urans-0.15, planetDist.urans+0.15,120);
+var geomertyNeptuneCircle = new THREE.RingGeometry(planetDist.neptune-0.15, planetDist.neptune+0.15,120);
+var geomertyEarthMoonCircle = new THREE.RingGeometry(planetDist.earthMoon-0.15, planetDist.earthMoon+0.15,120);
 
 // saturn's ring
-var geomertySaturnRingCircle = new THREE.RingGeometry(planetRelativeR.staturn + 10, planetRelativeR.staturn + 40,30);
+var geomertySaturnRingCircle = new THREE.RingGeometry(planetRelativeR.staturn+saturnRingInner, planetRelativeR.staturn + saturnRingOutter,30);
 
 // scoutship and mothership geometry
-var geometryScoutship = new THREE.CylinderGeometry(3, 1, 5, 32 );
-var geometryMothership = new THREE.CylinderGeometry(6, 1, 5.5, 32 );
+var geometryScoutship = new THREE.CylinderGeometry(1, 1, 1, 10);
+var geometryMothership = new THREE.CylinderGeometry(2, 1, 1, 32 );
 
 //========================================================================================
 // MATRERIAL
-// credit: image source: https://github.com/jeromeetienne/threex.planets
+// credit: 
+// image source: https://github.com/jeromeetienne/threex.planets
 //========================================================================================
 var material = new THREE.MeshNormalMaterial();
 
@@ -411,9 +409,8 @@ orbitPathEarthMoon.rotation.x = Math.PI/2;
 saturnRing.rotation.x = Math.PI/2;
 
 // ships
-scoutship.position.set(5,15,5);
-
-mothership.position.set(0,10,20);
+scoutship.position.set(40,10,40);
+mothership.position.set(40,20,20);
 
 //========================================================================================
 // ADD OBJECT TO PARENT
@@ -441,42 +438,6 @@ scene.add(jupiter);
 scene.add(staturn);
 scene.add(urans);
 scene.add(neptune);
-
-//========================================================================================
-// CUSTOM FUNCTIONS
-//========================================================================================
- 
-function rotateAboutAxis(object, axis, degree) {
-	var rad = (degree*Math.PI)/180;
-	var ident = new THREE.Matrix4();
-	switch (axis) {
-		case "x":
-			ident.makeRotationX(rad);
-		break;
-		case "y":
-			ident.makeRotationY(rad);
-		break;
-		case "z":
-			ident.makeRotationZ(rad);
-		break;
-		default:
-		break;
-	}
-	object.setMatrix(mulMatrix(object.matrix,ident));
-}
-
-function mulMatrix(matrix,app) {
-  return new THREE.Matrix4().multiplyMatrices(matrix,app);
-}
-
-function spaceShipPerspective() {
-	if (isMothership) {
-		
-	} else {
-		
-	}
-}
-
 
 //========================================================================================
 // UPDATE SYSTEM - ANIMATION
@@ -535,6 +496,127 @@ function updateSystem()
 }
 
 //========================================================================================
+// CUSTOM FUNCTIONS
+//========================================================================================
+ 
+function rotateAboutAxis(object, axis, degree) {
+	var rad = (degree*Math.PI)/180;
+	var ident = new THREE.Matrix4();
+	switch (axis) {
+		case "x":
+			ident.makeRotationX(rad);
+		break;
+		case "y":
+			ident.makeRotationY(rad);
+		break;
+		case "z":
+			ident.makeRotationZ(rad);
+		break;
+		default:
+		break;
+	}
+	object.setMatrix(mulMatrix(object.matrix,ident));
+}
+
+function mulMatrix(matrix,app) {
+  return new THREE.Matrix4().multiplyMatrices(matrix,app);
+}
+
+function spaceShipPerspective() {
+	if (isMothership) {
+		
+	} else {
+		
+	}
+}
+
+function changeStep(isIncrease) {
+	if (isIncrease) {
+
+	} else {
+		
+	}
+}
+
+function changeCamera(axis, isIncrease) {
+	switch (axis) {
+		case "x":
+			if (isIncrease) {
+
+			} else {
+
+			}
+		break;
+		case "y":
+			if (isIncrease) {
+
+			} else {
+				
+			}
+		break;
+		case "z":
+			if (isIncrease) {
+
+			} else {
+				
+			}
+		break;
+	}
+}
+
+function changeLookAt(axis,isIncrease) {
+	switch (axis) {
+		case "x":
+			if (isIncrease) {
+
+			} else {
+
+			}
+		break;
+		case "y":
+			if (isIncrease) {
+
+			} else {
+				
+			}
+		break;
+		case "z":
+			if (isIncrease) {
+
+			} else {
+				
+			}
+		break;
+	}
+}
+
+function changeUpVector(axis,isIncrease) {
+	switch (axis) {
+		case "x":
+			if (isIncrease) {
+
+			} else {
+
+			}
+		break;
+		case "y":
+			if (isIncrease) {
+
+			} else {
+				
+			}
+		break;
+		case "z":
+			if (isIncrease) {
+
+			} else {
+				
+			}
+		break;
+	}
+}
+
+//========================================================================================
 // KEYBOARD COMMANDS
 //========================================================================================
 
@@ -544,9 +626,9 @@ var keyboard = new THREEx.KeyboardState();
 var grid_state = false;
 var freezeTime = false;
 var isMothership = false;
+var absoluteLookAtMode = false;
 		
-function onKeyDown(event)
-{
+function onKeyDown(event) {
 	// TO-DO: BIND KEYS TO YOUR CONTROLS	  
   if(keyboard.eventMatches(event,"shift+g"))
   {  // Reveal/Hide helper grid
@@ -556,18 +638,91 @@ function onKeyDown(event)
   else if(keyboard.eventMatches(event," ")){ 
     freezeTime = !freezeTime;
   }
-  else if(keyboard.eventMatches(event,"o")){ //Control mothership with ’o’
+  else if(keyboard.eventMatches(event,"o")){ //Control mothership
     isMothership = true;
   }
-  else if(keyboard.eventMatches(event,"p")){ //Control scoutship with ’p’.
+  else if(keyboard.eventMatches(event,"p")){ //Control scoutship
     isMothership = false;
   }
   else if(keyboard.eventMatches(event,"m")){ //Reset both cameras with ’m’.
     isMothership = false;
 
   }
-
-
+  else if(keyboard.eventMatches(event,"l")){ //toggle absolute look at mode
+    absoluteLookAtMode = !absoluteLookAtMode;
+  }
+  else if (absoluteLookAtMode) {
+  	  // Increase/Decrease camera x location with ’x’/’X’
+	  if(keyboard.eventMatches(event,"x")){
+	    changeCamera("x",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+x")){
+	    changeCamera("x",false);
+	  }
+	  // Increase/Decrease camera y location with ’y’/’Y’
+	  else if(keyboard.eventMatches(event,"y")){
+	    changeCamera("y",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+y")){
+	    changeCamera("y",false);
+	  }
+	  // Increase/Decrease camera z location with ’z’/’Z’
+	  else if(keyboard.eventMatches(event,"z")){
+	    changeCamera("z",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+z")){
+	    changeCamera("z",false);
+	  }
+	  // Increase/Decrease the x location the camera is looking at ’a’/’A’
+	  else if(keyboard.eventMatches(event,"a")){
+	    changeLookAt("x",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+a")){
+	    changeLookAt("x",false);
+	  }
+	  // Increase/Decrease the y location the camera is looking at ’b’/’B’
+	  else if(keyboard.eventMatches(event,"b")){
+	    changeLookAt("y",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+b")){
+	    changeLookAt("y",false);
+	  }
+	  // Increase/Decrease the z location the camera is looking at ’c’/’C’
+	  else if(keyboard.eventMatches(event,"c")){
+	    changeLookAt("z",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+c")){
+	    changeLookAt("z",false);
+	  }
+	  // Increase/Decrease the value of the up vector in the x coordinate ’d’/’D’
+	  else if(keyboard.eventMatches(event,"d")){
+	    changeUpVector("x",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+d")){
+	    changeUpVector("x",false);
+	  }
+	  // Increase/Decrease the value of the up vector in the y coordinate ’e’/’E’
+	  else if(keyboard.eventMatches(event,"e")){
+	    changeUpVector("y",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+e")){
+	    changeUpVector("y",false);
+	  }
+	  // Increase/Decrease the value of the up vector in the z coordinate ’f’/’F’
+	  else if(keyboard.eventMatches(event,"f")){
+	    changeUpVector("z",true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+f")){
+	    changeUpVector("z",false);
+	  }
+	  // Increase/decrease step size (the increment moved by a keypress from above) with keys ’k/K’
+	  else if(keyboard.eventMatches(event,"k")){
+	    changeStep(true);
+	  }
+	  else if(keyboard.eventMatches(event,"shif+k")){
+	    changeStep(false);
+	  }
+  }
 }
 keyboard.domElement.addEventListener('keydown', onKeyDown );
 		
