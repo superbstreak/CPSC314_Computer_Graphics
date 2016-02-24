@@ -532,6 +532,7 @@ function resetViews() {
 	scoutship.rotation.y = 0;
 	scoutship.rotation.z = 0;
 	traceDistance = [1,3,1];
+	updateGeoSyncLookAt(scene);
 }
 
 function resetCameras() {
