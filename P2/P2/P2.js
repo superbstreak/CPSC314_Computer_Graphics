@@ -531,7 +531,7 @@ function resetViews() {
 	scoutship.rotation.x = 0;
 	scoutship.rotation.y = 0;
 	scoutship.rotation.z = 0;
-	traceDistance = [2,2,2];
+	traceDistance = [1,3,1];
 }
 
 function resetCameras() {
