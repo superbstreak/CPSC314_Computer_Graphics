@@ -147,7 +147,7 @@ var ambientLight = new THREE.AmbientLight( 0x222222 );
 scene.add( ambientLight );
 
 var lights = [];
-lights[0] = new THREE.PointLight( 0xffffff, 1, 0 );
+lights[0] = new THREE.PointLight( 0xffffff, 2, 0 );
 lights[0].castShadow = true;
 
 lights[0].position.set( 0, 0, 0 ); // IN THE SUN....
@@ -182,6 +182,16 @@ var saturnRingInner = 10;
 var saturnRingOutter = 40;
 var earthBasedScaling = 5;
 
+var traceDistance = [1,3,1];
+var currentPlanet = 3;
+var stepSize = 1;
+var motherEye = [ 80, 20, 80 ];
+var motherUp = [ 0, 1, 0 ];
+var motherLookAt = {x:0,y:0,z:0};
+var scoutEye = [ 65, 20, 65 ];
+var scoutUp = [ 0, 1, 0 ];
+var scoutLootAt = {x:0,y:0,z:0};
+
 // Create Solar System
 var planetR = { sun: 696000, mercury: 2440, venus: 6052, earth: 6371, mars: 3389,
 	jupiter: 69911, staturn: 58232, urans: 25362, neptune: 24622, earthMoon: 1737
@@ -206,7 +216,7 @@ var planetRelativeR = {
 
 var planetOrbitSpeed = {	// speed relative to earth
 	mercury: 1.61,venus: 1.18,earth: 1,mars: 0.81,
-	jupiter: 0.44,staturn: 0.32,urans: 0.23,neptune: 0.18,earthMoon: 2.7
+	jupiter: 0.44,staturn: 0.32,urans: 0.23,neptune: 0.18,earthMoon: 0.037
 };
 
 var planetRoatationDelta = {
@@ -234,6 +244,10 @@ saturnRingOutter = 1.55;
 earthBasedScaling = 1;
 var planetDist = {sun: 0, mercury: 10,venus: 15,earth: 20,mars: 25,
 	jupiter: 30,staturn: 35,urans: 40,neptune: 45,earthMoon: 1.5 // from earth
+};
+var inclinationAxis = { // converted to rad
+	mercury: 0,venus: 0,earth: 0,mars: 0,
+	jupiter: 0,staturn: 0,urans: 0,neptune: 0
 };
 var planetRelativeR = {
 	sun: 5,
@@ -286,8 +300,8 @@ var geomertyEarthMoonCircle = new THREE.RingGeometry(planetDist.earthMoon-0.05, 
 var geomertySaturnRingCircle = new THREE.RingGeometry(planetRelativeR.staturn+saturnRingInner, planetRelativeR.staturn + saturnRingOutter,30);
 
 // ship
-var geometryMothership = new THREE.CylinderGeometry(2, 2, 2, 1);
-var geometryScoutship = new THREE.BoxGeometry(1, 1, 1);
+var geometryMothership = new THREE.CylinderGeometry(2, 0.5, 2, 32);
+var geometryScoutship = new THREE.CylinderGeometry(1, 0.1, 1, 32);
 
 //========================================================================================
 // MATRERIAL
@@ -295,6 +309,10 @@ var geometryScoutship = new THREE.BoxGeometry(1, 1, 1);
 // image source:https://github.com/jeromeetienne/threex.planets/tree/master/images
 //========================================================================================
 var material = new THREE.MeshNormalMaterial();
+
+var MSmaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+var SSmaterial = new THREE.MeshBasicMaterial( {color: 0xff9900} );
+
 
 // sun
 // var materialSun = new THREE.MeshBasicMaterial( {color: 0xffff00} );
@@ -364,8 +382,8 @@ var orbitPathEarthMoon = new THREE.Mesh(geomertyEarthMoonCircle, oribitalPathMat
 var saturnRing = new THREE.Mesh(geomertySaturnRingCircle, materialSaturnRing);
 
 // ships
-var mothership = new THREE.Mesh(geometryMothership, material);
-var scoutship = new THREE.Mesh(geometryScoutship, material);
+var mothership = new THREE.Mesh(geometryMothership, MSmaterial);
+var scoutship = new THREE.Mesh(geometryScoutship, SSmaterial);
 
 
 //========================================================================================
@@ -410,12 +428,6 @@ orbitPathEarthMoon.rotation.x = Math.PI/2;
 saturnRing.rotation.x = Math.PI/2;
 
 // ships
-var motherEye = [ 80, 20, 80 ];
-var motherUp = [ 0, 1, 0 ];
-var motherLookAt = {x:0,y:0,z:0};
-var scoutEye = [ 65, 20, 65 ];
-var scoutUp = [ 0, 1, 0 ];
-var scoutLootAt = {x:0,y:0,z:0};
 updateShipData();
 
 //========================================================================================
@@ -496,6 +508,8 @@ function updateSystem()
 	earthMoon.position.x = Math.sin(t*planetOrbitSpeed.earthMoon)*planetDist.earthMoon;
 	earthMoon.position.z = Math.cos(t*planetOrbitSpeed.earthMoon)*planetDist.earthMoon;
 
+	followPlanet();
+
 	t += Math.PI/380;
 }
 
@@ -504,29 +518,54 @@ function updateSystem()
 //========================================================================================
  
 function resetViews() {
+	stepSize = 1;
 	motherEye = [ 80, 20, 80 ];
 	motherUp = [ 0, 1, 0 ];
 	motherLookAt = {x:0,y:0,z:0};
 	scoutEye = [ 65, 20, 65 ];
 	scoutUp = [ 0, 1, 0 ];
 	scoutLootAt = {x:0,y:0,z:0};
+	mothership.rotation.x = 0;
+	mothership.rotation.y = 0;
+	mothership.rotation.z = 0;
+	scoutship.rotation.x = 0;
+	scoutship.rotation.y = 0;
+	scoutship.rotation.z = 0;
+	traceDistance = [2,2,2];
 }
 
-function updateCameras() {
-	camera_MotherShip.position.x = motherEye[ 0 ];
-	camera_MotherShip.position.y = motherEye[ 1 ];
-	camera_MotherShip.position.z = motherEye[ 2 ];
+function resetCameras() {
+	var view = views[0];
+	camera_MotherShip.position.x = view.eye[ 0 ];
+	camera_MotherShip.position.y = view.eye[ 1 ];
+	camera_MotherShip.position.z = view.eye[ 2 ];
+	camera_MotherShip.up.x = view.up[ 0 ];
+	camera_MotherShip.up.y = view.up[ 1 ];
+	camera_MotherShip.up.z = view.up[ 2 ];
+	camera_MotherShip.lookAt( scene.position );
+	view.camera = camera_MotherShip;
+
+
+	var view = views[1];
+	camera_ScoutShip.position.x = view.eye[ 0 ];
+	camera_ScoutShip.position.y = view.eye[ 1 ];
+	camera_ScoutShip.position.z = view.eye[ 2 ];
+	camera_ScoutShip.up.x = view.up[ 0 ];
+	camera_ScoutShip.up.y = view.up[ 1 ];
+	camera_ScoutShip.up.z = view.up[ 2 ];
+	camera_ScoutShip.lookAt( scene.position );
+	view.camera = camera_ScoutShip;
+}
+
+function updateAllCameras() {
 	camera_MotherShip.up.x = motherUp[ 0 ];
 	camera_MotherShip.up.y = motherUp[ 1 ];
 	camera_MotherShip.up.z = motherUp[ 2 ];
-	camera_MotherShip.lookAt(motherLookAt);
-	camera_ScoutShip.position.x = scoutEye[ 0 ];
-	camera_ScoutShip.position.y = scoutEye[ 1 ];
-	camera_ScoutShip.position.z = scoutEye[ 2 ];
+	camera_MotherShip.lookAt( motherLookAt );
 	camera_ScoutShip.up.x = scoutUp[ 0 ];
 	camera_ScoutShip.up.y = scoutUp[ 1 ];
 	camera_ScoutShip.up.z = scoutUp[ 2 ];
-	camera_ScoutShip.lookAt(scoutLootAt);
+	camera_ScoutShip.lookAt( scoutLootAt );
 }
 
 function updateShipData() {
@@ -571,10 +610,16 @@ function mulMatrix(matrix,app) {
 }
 
 function changeStep(isIncrease) {
-	if (isIncrease) {
-
-	} else {
-
+	switch (currentMode) {
+		case 1:
+			(isIncrease)? stepSize += 1 : stepSize += -1;
+		break;
+		case 2:
+			(isIncrease)? stepSize += Math.PI/64 : stepSize += -Math.PI/64;
+		break;
+		case 3:
+			(isIncrease)? stepSize += 1 : stepSize += -1;
+		break;
 	}
 }
 
@@ -582,29 +627,29 @@ function changeCamera(axis, isIncrease) {
 	switch (axis) {
 		case "x":
 			if (isIncrease) {
-				(isMothership)? camera_MotherShip.position.x += 1:camera_ScoutShip.position.x += 1;
-				(isMothership)? motherEye[0] += 1 : scoutEye[0] += 1;
+				(isMothership)? camera_MotherShip.position.x += stepSize:camera_ScoutShip.position.x += stepSize;
+				(isMothership)? motherEye[0] += stepSize : scoutEye[0] += stepSize;
 			} else {
-				(isMothership)? camera_MotherShip.position.x += -1:camera_ScoutShip.position.x += -1;
-				(isMothership)? motherEye[0] += -1 : scoutEye[0] += -1;
+				(isMothership)? camera_MotherShip.position.x += -stepSize:camera_ScoutShip.position.x += -stepSize;
+				(isMothership)? motherEye[0] += -stepSize : scoutEye[0] += -stepSize;
 			}
 		break;
 		case "y":
 			if (isIncrease) {
-				(isMothership)? camera_MotherShip.position.y += 1:camera_ScoutShip.position.y += 1;
-				(isMothership)? motherEye[1] += 1 : scoutEye[1] += 1;
+				(isMothership)? camera_MotherShip.position.y += stepSize:camera_ScoutShip.position.y += stepSize;
+				(isMothership)? motherEye[1] += stepSize : scoutEye[1] += stepSize;
 			} else {
-				(isMothership)? camera_MotherShip.position.y += -1:camera_ScoutShip.position.y += -1;
-				(isMothership)? motherEye[1] += -1 : scoutEye[1] += -1;
+				(isMothership)? camera_MotherShip.position.y += -stepSize:camera_ScoutShip.position.y += -stepSize;
+				(isMothership)? motherEye[1] += -stepSize : scoutEye[1] += -stepSize;
 			}
 		break;
 		case "z":
 			if (isIncrease) {
-				(isMothership)? camera_MotherShip.position.z += 1:camera_ScoutShip.position.z += 1;
-				(isMothership)? motherEye[2] += 1 : scoutEye[2] += 1;
+				(isMothership)? camera_MotherShip.position.z += stepSize:camera_ScoutShip.position.z += stepSize;
+				(isMothership)? motherEye[2] += stepSize : scoutEye[2] += stepSize;
 			} else {
-				(isMothership)? camera_MotherShip.position.z += -1:camera_ScoutShip.position.z += -1;
-				(isMothership)? motherEye[2] += -1 : scoutEye[2] += -1;
+				(isMothership)? camera_MotherShip.position.z += -stepSize:camera_ScoutShip.position.z += -stepSize;
+				(isMothership)? motherEye[2] += -stepSize : scoutEye[2] += -stepSize;
 			}
 		break;
 	}
@@ -615,27 +660,27 @@ function changeLookAt(axis,isIncrease) {
 	switch (axis) {
 		case "x":
 			if (isIncrease) {
-				(isMothership)? motherLookAt.x += 1 : scoutLootAt.x += 1;
+				(isMothership)? motherLookAt.x += stepSize : scoutLootAt.x += stepSize;
 			} else {
-				(isMothership)? motherLookAt.x += -1 : scoutLootAt.x += -1;
+				(isMothership)? motherLookAt.x += -stepSize : scoutLootAt.x += -stepSize;
 			}
 		break;
 		case "y":
 			if (isIncrease) {
-				(isMothership)? motherLookAt.y += 1 : scoutLootAt.y += 1;
+				(isMothership)? motherLookAt.y += stepSize : scoutLootAt.y += stepSize;
 			} else {
-				(isMothership)? motherLookAt.y += -1 : scoutLootAt.y += -1;
+				(isMothership)? motherLookAt.y += -stepSize : scoutLootAt.y += -stepSize;
 			}
 		break;
 		case "z":
 			if (isIncrease) {
-				(isMothership)? motherLookAt.z += 1 : scoutLootAt.z += 1;
+				(isMothership)? motherLookAt.z += stepSize : scoutLootAt.z += stepSize;
 			} else {
-				(isMothership)? motherLookAt.z += -1 : scoutLootAt.z += -1;
+				(isMothership)? motherLookAt.z += -stepSize : scoutLootAt.z += -stepSize;
 			}
 		break;
 	}
-	updateCameras();
+	updateAllCameras();
 	updateShipData();
 }
 
@@ -643,27 +688,94 @@ function changeUpVector(axis,isIncrease) {
 	switch (axis) {
 		case "x":
 			if (isIncrease) {
-				(isMothership)? camera_MotherShip.up.x += 5:camera_ScoutShip.up.x += 5;
+				(isMothership)? motherUp[0] += stepSize:scoutUp[0] += stepSize;
 			} else {
-				(isMothership)? camera_MotherShip.up.x += -5:camera_ScoutShip.up.x += -5;
+				(isMothership)?  motherUp[0] += -stepSize:scoutUp[0] += -stepSize;
 			}
 		break;
 		case "y":
 			if (isIncrease) {
-				(isMothership)? camera_MotherShip.up.y += 5:camera_ScoutShip.up.y += 5;
+				(isMothership)? motherUp[1] += stepSize:scoutUp[1] += stepSize;
 			} else {
-				(isMothership)? camera_MotherShip.up.y += -5:camera_ScoutShip.up.y += -5;
+				(isMothership)? motherUp[1] += -stepSize:scoutUp[1] += -stepSize;
 			}
 		break;
 		case "z":
 			if (isIncrease) {
-				(isMothership)? camera_MotherShip.up.z += 5:camera_ScoutShip.up.z += 5;
+				(isMothership)? motherUp[2] += stepSize:scoutUp[2] += stepSize;
 			} else {
-				(isMothership)? camera_MotherShip.up.z += -5:camera_ScoutShip.up.z += -5;
+				(isMothership)? motherUp[2] += -stepSize:scoutUp[2] += -stepSize;
 			}
 		break;
 	}
+	updateShipData();
+	updateAllCameras();
 }
+
+function followPlanet() {
+	if (currentMode != 3) {
+		return;
+	}
+	var pos;
+	var arr;
+	switch (currentPlanet) {
+		case 1:
+			pos = mercury.position;
+		break;
+		case 2:
+			pos = venus.position;
+		break;
+		case 3:
+			pos = earth.position;
+		break;
+		case 4:
+			pos = mars.position;
+		break;
+		case 5:
+			pos = jupiter.position;
+		break;
+		case 6:
+			pos = staturn.position;
+		break;
+		case 7:
+			pos = urans.position;
+		break;
+		case 8:
+			pos = neptune.position;
+		break;
+	}
+
+	if (isMothership) {
+		camera_MotherShip.position.x = traceDistance[0];
+		camera_MotherShip.position.y = traceDistance[1];
+		camera_MotherShip.position.z = traceDistance[2];
+		motherEye = traceDistance;
+	} else {
+		camera_ScoutShip.position.x = traceDistance[0];
+		camera_ScoutShip.position.y = traceDistance[1];
+		camera_ScoutShip.position.z = traceDistance[2];
+		scoutEye = traceDistance;
+	}
+
+	updateAllCameras();
+	updateShipData();
+}
+
+function updateGeoSyncLookAt (newLookAt) {
+	if (isMothership){
+		currentPlanetPlacement.remove(mothership);
+		currentPlanetPlacement.remove(camera_MotherShip);
+		newLookAt.add(mothership);
+		newLookAt.add(camera_MotherShip);
+	} else {
+		currentPlanetPlacement.remove(scoutship);
+		currentPlanetPlacement.remove(camera_ScoutShip);
+		newLookAt.add(scoutship);
+		newLookAt.add(camera_ScoutShip);
+	}
+	currentPlanetPlacement = newLookAt;
+}
+
 
 //========================================================================================
 // KEYBOARD COMMANDS
@@ -675,7 +787,27 @@ var keyboard = new THREEx.KeyboardState();
 var grid_state = false;
 var freezeTime = false;
 var isMothership = false;
-var absoluteLookAtMode = false;
+var currentMode = 1;
+var currentPlanetPlacement = scene;
+
+function modeSwitch(mode) {
+	
+	switch(mode) {
+		case "absolute":
+			stepSize = 1; // reset step size
+			currentMode = 1;
+		break;
+		case "relative":
+			stepSize = Math.PI/64; // reset step size
+			currentMode = 2;
+		break;
+		case "geosynchronous":
+			currentPlanet = 3;
+			currentMode = 3;
+			updateGeoSyncLookAt(earth);
+		break;
+	}
+}
 		
 function onKeyDown(event) {
 	// TO-DO: BIND KEYS TO YOUR CONTROLS	  
@@ -694,15 +826,21 @@ function onKeyDown(event) {
   }
   else if(keyboard.eventMatches(event,"m")){ //Reset both cameras with ’m’.
     isMothership = false;
-    absoluteLookAtMode = true;
+    modeSwitch("absolute");
     resetViews();
-    updateCameras();
+    resetCameras();
 	updateShipData();
   }
   else if(keyboard.eventMatches(event,"l")){ //toggle absolute look at mode
-    absoluteLookAtMode = !absoluteLookAtMode;
+    modeSwitch("absolute");
   }
-  else if (absoluteLookAtMode) {
+  else if (keyboard.eventMatches(event,"r")) { // toggle relative flying
+  	modeSwitch("relative");
+  }
+  else if (keyboard.eventMatches(event,"g")) { // toggle relative flying
+  	modeSwitch("geosynchronous");
+  }
+  else if (currentMode == 1) {
   	  // Increase/Decrease camera x location with ’x’/’X’
   	  if(keyboard.eventMatches(event,"shift+x")){
 	    changeCamera("x",false);
@@ -764,7 +902,7 @@ function onKeyDown(event) {
 	    changeUpVector("z",false);
 	  }
 	  else if(keyboard.eventMatches(event,"f")){
-	    changeUpVector("z",true);
+	    changeUpVector("z",true);	
 	  }
 	  // Increase/decrease step size (the increment moved by a keypress from above) with keys ’k/K’
 	  else if(keyboard.eventMatches(event,"shift+k")){
@@ -773,6 +911,121 @@ function onKeyDown(event) {
 	  else if(keyboard.eventMatches(event,"k")){
 	    changeStep(true);
 	  }
+  }
+  else if (currentMode == 2) { // relative flying mode
+	// Change yaw wrt local Camera coordinates with increment/decrement keys ’q’/’Q’ 
+	// or with the horizontal component of the left mouse drag.
+	if(keyboard.eventMatches(event,"shift+q")){
+	  (isMothership)? mothership.rotation.y += stepSize : scoutship.rotation.y += stepSize;
+	  (isMothership)? camera_MotherShip.rotation.y += stepSize : camera_ScoutShip.rotation.y += stepSize;
+	}
+	else if(keyboard.eventMatches(event,"q")){
+	  (isMothership)? mothership.rotation.y += -stepSize : scoutship.rotation.y += -stepSize;
+	  (isMothership)? camera_MotherShip.rotation.y += -stepSize : camera_ScoutShip.rotation.y += -stepSize;
+	}
+
+	// Change pitch wrt local Camera coordinates with increment/decrement keys ’s’/’S’ 
+	// or with the vertical component of the left mouse drag.
+	else if(keyboard.eventMatches(event,"shift+s")){
+	   (isMothership)? mothership.rotation.x += stepSize : scoutship.rotation.x += stepSize;
+	   (isMothership)? camera_MotherShip.rotation.x += stepSize : camera_ScoutShip.rotation.x += stepSize;
+	}
+	else if(keyboard.eventMatches(event,"s")){
+	    (isMothership)? mothership.rotation.x += -stepSize : scoutship.rotation.x += -stepSize;
+	    (isMothership)? camera_MotherShip.rotation.x += -stepSize : camera_ScoutShip.rotation.x += -stepSize;
+	}
+
+	// Roll wrt local Camera up vector with increment/decrement keys ’a’/’A’ 
+	else if(keyboard.eventMatches(event,"shift+a")){
+	   (isMothership)? mothership.rotation.z += stepSize : scoutship.rotation.z += stepSize;
+	   (isMothership)? camera_MotherShip.rotation.z += stepSize : camera_ScoutShip.rotation.z += stepSize;
+	}
+	else if(keyboard.eventMatches(event,"a")){
+	   (isMothership)? mothership.rotation.z += -stepSize : scoutship.rotation.z += -stepSize;
+	   (isMothership)? camera_MotherShip.rotation.z += -stepSize : camera_ScoutShip.rotation.z += -stepSize;
+	}
+
+	// Forward/backward motion wrt local Camera z with increment/decrement keys ’w’/’W’, 
+	else if(keyboard.eventMatches(event,"shift+w")){
+	   (isMothership)? camera_MotherShip.position.x += stepSize : camera_ScoutShip.position.x += stepSize;
+	   (isMothership)? camera_MotherShip.position.z += stepSize : camera_ScoutShip.position.z += stepSize;
+	   (isMothership)? motherEye[0] += stepSize : scoutEye[0] += stepSize;
+	   (isMothership)? motherEye[2] += stepSize : scoutEye[2] += stepSize;
+	   updateShipData();
+	}
+	else if(keyboard.eventMatches(event,"w")){
+	   (isMothership)? camera_MotherShip.position.x += -stepSize : camera_ScoutShip.position.x += -stepSize;
+	   (isMothership)? camera_MotherShip.position.z += -stepSize : camera_ScoutShip.position.z += -stepSize;
+	   (isMothership)? motherEye[0] += -stepSize : scoutEye[0] += -stepSize;
+	   (isMothership)? motherEye[2] += -stepSize : scoutEye[2] += -stepSize;
+	   updateShipData();
+	}
+
+	// or with the vertical component of the mouse drag when the ’t’ key is held down. 
+	// The vertical magnitude of the drag should control the translation distance. 
+	else if(keyboard.eventMatches(event,"t")){
+	   
+	}
+
+  	//Increase/decrease speed (the increment moved by a keypress above) with increment/decrement keys ’k’/’K’.
+  	else if(keyboard.eventMatches(event,"shift+k")){
+	   changeStep(false);
+	}
+	else if(keyboard.eventMatches(event,"k")){
+	   changeStep(true);
+	}
+  }
+  else if (currentMode == 3) { // geosync mode
+
+	// Move closer/further to planet with keys ’w’/’W’ or with the vertical component of the mouse drag, as above
+	if(keyboard.eventMatches(event,"shift+w")){
+	   (isMothership)? traceDistance[1] += stepSize : traceDistance[1] += stepSize;
+	}
+	else if(keyboard.eventMatches(event,"w")){
+	   (isMothership)? traceDistance[1] += -stepSize : traceDistance[1] += -stepSize;
+	}
+
+  	//Increase/decrease speed (increment moved by a keypress above) with key ’k’/’K’
+  	else if(keyboard.eventMatches(event,"shift+k")){
+	   changeStep(false);
+	}
+	else if(keyboard.eventMatches(event,"k")){
+	   changeStep(true);
+	}
+
+	//Change the planet to orbit around with the numbers ’1 to 8’ By default, the planet to orbit is Earth (number ’3’).
+  	else if(keyboard.eventMatches(event,"1")){ // mercury
+  		updateGeoSyncLookAt(mercury);
+	   currentPlanet = 1;
+	}
+	else if(keyboard.eventMatches(event,"2")){ // venus
+		updateGeoSyncLookAt(venus);
+	   currentPlanet = 2;
+	}
+	else if(keyboard.eventMatches(event,"3")){ // earth defualt
+	   updateGeoSyncLookAt(earth);
+	   currentPlanet = 3;
+	}
+	else if(keyboard.eventMatches(event,"4")){ // mars
+		updateGeoSyncLookAt(mars);
+	   currentPlanet = 4;
+	}
+	else if(keyboard.eventMatches(event,"5")){ // jupiter
+		updateGeoSyncLookAt(jupiter);
+	   currentPlanet = 5;
+	}
+	else if(keyboard.eventMatches(event,"6")){ // saturn
+		updateGeoSyncLookAt(staturn);
+	   currentPlanet = 6;
+	}
+	else if(keyboard.eventMatches(event,"7")){ // uranus
+		updateGeoSyncLookAt(urans);
+	  currentPlanet = 7;
+	}
+	else if(keyboard.eventMatches(event,"8")){ // neptune
+		updateGeoSyncLookAt(neptune);
+	  currentPlanet = 8;
+	}
   }
 }
 keyboard.domElement.addEventListener('keydown', onKeyDown );
