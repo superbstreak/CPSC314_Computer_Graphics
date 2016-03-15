@@ -98,14 +98,23 @@ var blinnMateral = new THREE.ShaderMaterial({
     lightColor: {tpye: 'c', value: lightColor},
     ambientColor: {type: 'c', value: ambientColor},
     lightPosition: {type: 'v3', value: lightPosition},
+    disffuseColor: {type: 'c', value: disffuseColor},
+    specularColor: {type: 'c', value: specularColor},
+    shininess: {type: 'f', value: shininess},
   },
 });
 
 var coolToWarmMateral = new THREE.ShaderMaterial({
   uniforms :{
-    lightColor: {tpye: 'c', value: lightColor},
     ambientColor: {type: 'c', value: ambientColor},
     lightPosition: {type: 'v3', value: lightPosition},
+    disffuseColor: {type: 'c', value: disffuseColor},
+    specularColor: {type: 'c', value: specularColor},
+    shininess: {type: 'f', value: shininess},
+    litColor: {type: 'c', value: litColor},
+    unLitColor: {type: 'c', value: unLitColor},
+    outlineColor: {type: 'c', value: outlineColor},
+    shininess: {type: 'f', value: shininess},
   },
 });
 
@@ -120,6 +129,8 @@ var shaderFiles = [
   'glsl/phong.fs.glsl',
   'glsl/blinn.vs.glsl',
   'glsl/blinn.fs.glsl',
+  'glsl/cooltowarm.vs.glsl',
+  'glsl/cooltowarm.fs.glsl',
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -138,6 +149,10 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
   blinnMateral.vertexShader = shaders['glsl/blinn.vs.glsl'];
   blinnMateral.fragmentShader = shaders['glsl/blinn.fs.glsl'];
   blinnMateral.needsUpdate = true;
+
+  coolToWarmMateral.vertexShader = shaders['glsl/cooltowarm.vs.glsl'];
+  coolToWarmMateral.fragmentShader = shaders['glsl/cooltowarm.fs.glsl'];
+  coolToWarmMateral.needsUpdate = true;
 })
 
 // ======================================================================
@@ -193,17 +208,50 @@ gem_phong_blinn.position.set(1, 1, -1);
 scene.add(gem_phong_blinn);
 gem_phong_blinn.parent = floor;
 
-var gem_toon = new THREE.Mesh(sphere, defaultMaterial);
+var gem_toon = new THREE.Mesh(sphere, coolToWarmMateral);
 gem_toon.position.set(3, 1, -1);
 scene.add(gem_toon);
 gem_toon.parent = floor;
 
 // SETUP UPDATE CALL-BACK
 var keyboard = new THREEx.KeyboardState();
+var currentShader = 1;
+var prevShader = 1;
+function onKeyDown(event) {
+  if(keyboard.eventMatches(event,"1")) { 
+    currentShader = 1;
+  } else if(keyboard.eventMatches(event,"2")) { 
+    currentShader = 2;
+  } else if(keyboard.eventMatches(event,"3")) {  
+    currentShader = 3;
+  } else if(keyboard.eventMatches(event,"4")) { 
+    currentShader = 4;
+  }
+  updateArmShader();
+}
+
+function updateArmShader() {
+  new THREE.SourceLoader().load(shaderFiles, function(shaders) {
+    if (keyboard.pressed("1")) {
+        armadilloMaterial.vertexShader = shaders['glsl/gouraud.vs.glsl'];
+        armadilloMaterial.fragmentShader = shaders['glsl/gouraud.fs.glsl'];
+    } else if (keyboard.pressed("2")) {
+        armadilloMaterial.vertexShader = shaders['glsl/phong.vs.glsl'];
+        armadilloMaterial.fragmentShader = shaders['glsl/phong.fs.glsl'];
+    } else if (keyboard.pressed("3")) {
+        armadilloMaterial.vertexShader = shaders['glsl/blinn.vs.glsl'];
+        armadilloMaterial.fragmentShader = shaders['glsl/blinn.fs.glsl'];
+    } else if (keyboard.pressed("4")) {
+        armadilloMaterial.vertexShader = shaders['glsl/cooltowarm.vs.glsl'];
+        armadilloMaterial.fragmentShader = shaders['glsl/cooltowarm.fs.glsl'];
+    }
+    armadilloMaterial.needsUpdate = true;
+  });
+}
+
 var render = function() {
  // tip: change armadillo shading here according to keyboard
-
-
+  updateArmShader();
  requestAnimationFrame(render);
  renderer.render(scene, camera);
 }
