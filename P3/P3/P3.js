@@ -58,7 +58,7 @@ var unLitArmadilloColor = new THREE.Color(0.04,0.3,0.15);
 
 var disffuseColor = new THREE.Color(1,1,1);
 var specularColor = new THREE.Color(0.8,0.8,0.8);
-var shininess = 15.0;
+var shininess = 10;
 var toneBalance = 0.5;
 // ======================================================================
 // MATERIALS

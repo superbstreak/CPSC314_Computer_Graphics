@@ -28,10 +28,7 @@ void main() {
 	// ===============================================================
 	// a dot product between the halfway vector between light and viewing direction, and the surface normal can be used
 	vec3 r = normalize(norm_l + norm_v);
-
-	// ===============================================================
-	// R.V
-	float rv = dot(r,norm_v);
+	float rv = dot(r,interpolatedNormal);
 	float clamp_rv = max(0.0, rv);
 	float shine_rv = pow(clamp_rv, shininess);
 
