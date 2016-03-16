@@ -1,11 +1,13 @@
 varying vec3 interpolatedNormal;
 varying vec3 vertexPosition;
 uniform vec3 lightPosition;
-uniform vec3 lightColor;
+uniform vec3 lightColorK;
 uniform vec3 ambientColor;
-uniform vec3 disffuseColor;
-uniform vec3 specularColor;
 uniform float shininess;
+
+uniform float kAmbient;
+uniform float kDiffuse;
+uniform float kSpecular;
 
 void main() {
 	// ===============================================================
@@ -27,19 +29,19 @@ void main() {
 
 	// ===============================================================
 	// a dot product between the halfway vector between light and viewing direction, and the surface normal can be used
-	vec3 r = normalize(norm_l + norm_v);
-	float rv = dot(r,interpolatedNormal);
-	float clamp_rv = max(0.0, rv);
-	float shine_rv = pow(clamp_rv, shininess);
+	vec3 h = normalize((norm_l + norm_v)/2.0);
+	float hn = dot(h,interpolatedNormal);
+	float clamp_hn = max(0.0, hn);
+	float shine_rv = pow(clamp_hn, shininess);
 
 	// ===============================================================
 	// diff and specular 
-	vec3 i_diff = clamp_nl * disffuseColor;
-	vec3 i_spec = shine_rv * specularColor;
+	vec3 i_diff = clamp_nl * lightColorK;
+	vec3 i_spec = shine_rv * lightColorK;
 
 	// ===============================================================
 	// interp color
-	vec3 color = ambientColor + i_diff + i_spec;
+	vec3 color = kAmbient * ambientColor + kDiffuse * i_diff + kSpecular * i_spec;
 
 
 	gl_FragColor = vec4(color, 1.0);

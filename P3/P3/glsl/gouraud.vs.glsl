@@ -1,12 +1,12 @@
 varying vec3 interpolatedNormal;
 varying vec3 color;
 uniform vec3 lightPosition;
-uniform vec3 lightColor;
+uniform vec3 lightColorK;
 uniform vec3 ambientColor;
-uniform vec3 disffuseColor;
-uniform vec3 specularColor;
 uniform float shininess;
-
+uniform float kAmbient;
+uniform float kDiffuse;
+uniform float kSpecular;
 
 void main() {
 	
@@ -45,12 +45,12 @@ void main() {
 
 	// ===============================================================
 	// diff and specular 
-	vec3 i_diff = clamp_nl * disffuseColor;
-	vec3 i_spec = shine_rv * specularColor;
+	vec3 i_diff = clamp_nl * lightColorK;
+	vec3 i_spec = shine_rv * lightColorK;
 
 	// ===============================================================
 	// interp color
-	color = ambientColor + i_diff + i_spec;
+	color = kAmbient * ambientColor + kDiffuse * i_diff + kSpecular * i_spec;
 
 	// ===============================================================
 	// required

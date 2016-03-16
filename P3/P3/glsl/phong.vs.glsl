@@ -1,11 +1,13 @@
 varying vec3 interpolatedNormal;
 varying vec3 vertexPosition;
 uniform vec3 lightPosition;
-uniform vec3 lightColor;
+uniform vec3 lightColorK;
 uniform vec3 ambientColor;
-uniform vec3 disffuseColor;
-uniform vec3 specularColor;
 uniform float shininess;
+
+uniform float kAmbient;
+uniform float kDiffuse;
+uniform float kSpecular;
 
 void main(){
 	

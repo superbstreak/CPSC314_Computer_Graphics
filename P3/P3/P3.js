@@ -49,68 +49,80 @@ var lightColor = new THREE.Color(1,1,1);
 var ambientColor = new THREE.Color(0.1,0.1,0.1);
 var lightPosition = new THREE.Vector3(70,100,70);
 
-var litColor = new THREE.Color(0.3,0.4,0.6);
-var unLitColor = new THREE.Color(0.15,0.2,0.3);
+var litColor = new THREE.Color(0.75,0.25,0);
+var unLitColor = new THREE.Color(0,0,1);
 var outlineColor = new THREE.Color(0.04,0.1,0.15);
 
 var litArmadilloColor = new THREE.Color(0.15,0.6,0.3);
 var unLitArmadilloColor = new THREE.Color(0.04,0.3,0.15);
 
-var disffuseColor = new THREE.Color(1,1,1);
-var specularColor = new THREE.Color(0.8,0.8,0.8);
-var shininess = 10;
+var kAmbient = 0.4;
+var kDiffuse = 0.8;
+var kSpecular = 0.8;
+var shininess = 10.0;
 var toneBalance = 0.5;
 // ======================================================================
 // MATERIALS
 var defaultMaterial = new THREE.MeshLambertMaterial();
 var armadilloMaterial = new THREE.ShaderMaterial({
    uniforms: {
-     lightColor : {type : 'c', value: lightColor},
-     ambientColor : {type : 'c', value: ambientColor},
-     lightPosition : {type: 'v3', value: lightPosition},
+      lightColorK : {type : 'c', value: litArmadilloColor},
+      ambientColor : {type : 'c', value: litArmadilloColor},
+      lightPosition : {type: 'v3', value: lightPosition},
+      kAmbient: {type: 'f', value: kAmbient},
+      kDiffuse: {type: 'f', value: kDiffuse},
+      kSpecular: {type: 'f', value: kSpecular},
+      litColor: {type: 'c', value: litArmadilloColor},
+      unLitColor: {type: 'c', value: unLitArmadilloColor},
+      outlineColor: {type: 'c', value: outlineColor},
+      shininess: {type: 'f', value: shininess},
    },
 });
 
 var gouraudMateral = new THREE.ShaderMaterial({
   uniforms :{
-    lightColor: {tpye: 'c', value: lightColor},
+    lightColorK: {type: 'c', value: lightColor},
     ambientColor: {type: 'c', value: ambientColor},
     lightPosition: {type: 'v3', value: lightPosition},
-    disffuseColor: {type: 'c', value: disffuseColor},
-    specularColor: {type: 'c', value: specularColor},
+    kAmbient: {type: 'f', value: kAmbient},
+    kDiffuse: {type: 'f', value: kDiffuse},
+    kSpecular: {type: 'f', value: kSpecular},
     shininess: {type: 'f', value: shininess},
   },
 });
 
 var phongMateral = new THREE.ShaderMaterial({
   uniforms :{
-    lightColor: {tpye: 'c', value: lightColor},
+    lightColorK: {type: 'c', value: lightColor},
     ambientColor: {type: 'c', value: ambientColor},
     lightPosition: {type: 'v3', value: lightPosition},
-    disffuseColor: {type: 'c', value: disffuseColor},
-    specularColor: {type: 'c', value: specularColor},
+    kAmbient: {type: 'f', value: kAmbient},
+    kDiffuse: {type: 'f', value: kDiffuse},
+    kSpecular: {type: 'f', value: kSpecular},
     shininess: {type: 'f', value: shininess},
   },
 });
 
 var blinnMateral = new THREE.ShaderMaterial({
   uniforms :{
-    lightColor: {tpye: 'c', value: lightColor},
+    lightColorK: {type: 'c', value: lightColor},
     ambientColor: {type: 'c', value: ambientColor},
     lightPosition: {type: 'v3', value: lightPosition},
-    disffuseColor: {type: 'c', value: disffuseColor},
-    specularColor: {type: 'c', value: specularColor},
+    kAmbient: {type: 'f', value: kAmbient},
+    kDiffuse: {type: 'f', value: kDiffuse},
+    kSpecular: {type: 'f', value: kSpecular},
     shininess: {type: 'f', value: shininess},
   },
 });
 
 var coolToWarmMateral = new THREE.ShaderMaterial({
   uniforms :{
+    lightColorK: {type: 'c', value: lightColor},
     ambientColor: {type: 'c', value: ambientColor},
     lightPosition: {type: 'v3', value: lightPosition},
-    disffuseColor: {type: 'c', value: disffuseColor},
-    specularColor: {type: 'c', value: specularColor},
-    shininess: {type: 'f', value: shininess},
+    kAmbient: {type: 'f', value: kAmbient},
+    kDiffuse: {type: 'f', value: kDiffuse},
+    kSpecular: {type: 'f', value: kSpecular},
     litColor: {type: 'c', value: litColor},
     unLitColor: {type: 'c', value: unLitColor},
     outlineColor: {type: 'c', value: outlineColor},
@@ -215,20 +227,6 @@ gem_toon.parent = floor;
 
 // SETUP UPDATE CALL-BACK
 var keyboard = new THREEx.KeyboardState();
-var currentShader = 1;
-var prevShader = 1;
-function onKeyDown(event) {
-  if(keyboard.eventMatches(event,"1")) { 
-    currentShader = 1;
-  } else if(keyboard.eventMatches(event,"2")) { 
-    currentShader = 2;
-  } else if(keyboard.eventMatches(event,"3")) {  
-    currentShader = 3;
-  } else if(keyboard.eventMatches(event,"4")) { 
-    currentShader = 4;
-  }
-  updateArmShader();
-}
 
 function updateArmShader() {
   new THREE.SourceLoader().load(shaderFiles, function(shaders) {

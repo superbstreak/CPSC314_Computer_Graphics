@@ -5,9 +5,11 @@ uniform vec3 litColor;
 uniform vec3 unLitColor;
 uniform float outlineColor;
 uniform vec3 ambientColor;
-uniform vec3 disffuseColor;
-uniform vec3 specularColor;
 uniform float shininess;
+uniform vec3 lightColorK;
+uniform float kAmbient;
+uniform float kDiffuse;
+uniform float kSpecular;
 
 
 void main(){
