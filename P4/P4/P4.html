@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>CPSC 314 P4</title
+        <link href="https://fonts.googleapis.com/css?family=Raleway:400,100|Roboto+Condensed:700" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body class="is-loading">
+    <div id="preloader">
+            <div class="txt">
+                <p class="txt-perc">0%</p>
+                <div class="progress"><span></span></div>
+        </div>
+    </div>
+
+    <div id="container">
+        
+        <div id="game-stats">
+            <p id="fps" >FPS: 60</p>
+            <p id="distance" >Distance: 0</p>
+        </div>
+        <div id="canvas"></div>
+
+           
+    </div>
+
+
+    <div id="center-screen" class="hidden" >
+            <div id="leaderboard" >
+                <p id="leaderboard-txt">Leaderbaord</p>
+                <ul class="results"></ul>
+                <p id="personal-ranking">You Ranked: > Top 20</p>
+                <table class="leaderboard-tab" style="width:100%">
+                  <tr>
+                    <th>Rank</th>
+                    <th>Won</th> 
+                    <th>Distance</th>
+                    <th>Date</th>
+                  </tr>
+                </table>
+            </div>
+        </div>
+<!--         <hr>
+        <div id="submission">
+            <p>Add New Record</p>
+            <form>
+           
+            <label>User Name:</label><input type="text" name="user_name" id="user_name"><br>
+            <label>Score: </label><input type="text" name="score" id="score">
+            <input type="submit" value="Submit" id="submit">
+
+        </form>
+ -->
+    </div>
+
+    
+
+
+
+
+    <script src="fonts/helvetiker_bold.typeface.js"></script>
+    <script src="fonts/helvetiker_regular.typeface.js"></script>
+
+    <!-- <script src="js/stats.min.js"></script> -->
+    <script src="js/three.js"></script>
+    <script src="js/STLLoader.js"></script>
+    <script src="js/XHRLoader.js"></script>
+    <script src="js/DDSLoader.js"></script>
+    <script src="js/MTLLoader.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/SourceLoader.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/KeyboardState.js"></script> <!-- By Jerome Etienne: http://jetienne.com/ -->
+    <script src="js/MatrixStack.js"></script>
+    <script src="js/material.js"></script>
+
+    <script src="js/vendor/jquery-1.11.2.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/mobileservices/MobileServices.Web-1.2.5.min.js"></script>
+    <script src="js/TweenMax.min.js"></script>
+	  <script src="P4.js"></script>
+</body>
+</html>
+

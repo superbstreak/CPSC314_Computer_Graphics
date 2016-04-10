@@ -1,0 +1,89 @@
+﻿CPSC 314 Project 4 Proposal
+Name: Rob Wu
+SID: 42764118
+CSID: y4d8
+EMAIL: robwu@outlook.com
+
+All working team members: 
+Just me.
+
+Inspiration:
+I've been playing light weight games for a few years now. Some of my all time favorites includes Temple Run, HR Battle 2, Simple Rockets, Fruit Ninja and more.
+These games all have simple game play and user interface. So for my project 4, that is what I'm going to mimic, a simple intuitive game play that is easy to pick up for the user. In particular, I'm interested in making something similar to temple run.
+
+
+Game Idea:
+The game will be called 'The hunt for the Oscars'. This game will be an finite running game featuring Leo DiCaprio and his thirst for an Oscars award. The use will be using the keyboard to control Leo, the game character, to avoid multiple obsticles that are in his way to a Oscar award. The game will end if the user successfully acquire an Oscars award (win) or hit one of the obsticles (lose). The Oscars award will be appearing every 1000 meters of runing at a random location in the scene. The user would have to act fast enough to acquire the award or run another 1000 m and try again. If Leo acquires an Oscars nomination along the way, Leo will experience a short burst of speed boost.
+
+
+Requirement Fullfillment:
+• 3D objects:
+	The main character, Leo
+	The obsticles of various shape and sizes
+	The Oscars nominations
+	The Oscars award
+
+• 3D camera:
+	There will be 2 cameras in total. One would be from the perspective of Leo looking ahead. The other camera will be from the perspective of either top down or maybe from the peresepetive of the moving Oscars award.
+
+
+• Interactivity:
+	The user will be using their keyboard to control the movement of Leo.
+
+
+• Lighting and shading:
+	Leo will be utilize lighting and shading in this game.
+
+
+• Picking:
+	For picking, I'm thinking the user will be able to alter the obsticles in the scene in the very beginning of the game. Or the 	user will be able to click on some of the objects in the scene during the game which will set of an effect on the attributes of 	Leo / change scene or so.
+	
+
+• Texturing:
+	The ground will be using textured to mimic red carpet or some other award scenes.
+
+
+• On-screen control panel:
+	The on screen control panel will display Leo's disntace run.
+
+
+• Gameplay:
+	The game will end if the user successfully acquire an Oscars award (win) or hit one of the obsticles (lose). The Oscars award will be appearing every 1000 meters of runing at a random location in the scene. The user would have to act fast enough to acquire the award or run another 1000 m and try again. If Leo acquires an Oscars nomination along the way, Leo will experience a short burst of speed boost.
+
+
+• Advance Features (Only required one):
+
+	• Collision detection:
+		If the user hit one of the obsticles, the game should terminate and the player lost. If the user hit one of the nominations, Leo's speed should increase.
+
+	• Animation:
+		Maybe there will be a short animation when the user win or lose.
+
+
+Implementation Plan:
+I plan to implement as follow:
+			0. the cameras
+			1. a finite length scene
+			2. a plain simple Leo
+			3. an obsticle
+			4. a nomination
+			5. a award
+			6. keyboard movment of Leo in the scene (testing)
+			7. texture the floor
+			8. making the floor infinite
+			9. on screen display
+			10. collision detection
+			11. apply lighting and shading
+			12. keeping scores and distance and updating it
+			13. displaying win/lose indicator
+
+
+
+Potential Problems:
+I can see how the collision detection could potentially be a challenge later on.
+I can also see making the floor be an infinite running game would need some research. 
+The texturing of the floor will need to be look into in more detail. 
+
+
+Images:
+See attachment.
