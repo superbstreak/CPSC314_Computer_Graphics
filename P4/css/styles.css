@@ -1,0 +1,252 @@
+
+#stats { position: absolute; top:0; left: 0 }
+
+
+#container {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+#distance {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50px;
+  left: 3px;
+  font-family: 'Roboto Condensed', Helvetica, Helvetica Neue, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #ffff00;
+  white-space: nowrap;
+}
+
+#fps {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 10px;
+  left: 3px;
+  font-family: 'Roboto Condensed', Helvetica, Helvetica Neue, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #ffff00;
+  white-space: nowrap;
+}
+
+#canvas {
+  z-index: 10;
+}
+
+
+
+#leaderboard {
+  background: rgba(0,0,0,0.5);
+  color: #ffff00;
+  font-family: 'Roboto Condensed', Helvetica, Helvetica Neue, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  width: 300px;
+  height: 100%;
+}
+
+#center-screen {
+  position: relative;
+  background: transparent;
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+}
+
+
+
+.leaderboard-tab {
+  margin:0px;padding:0px;
+  width:100%;
+  border:1px solid #000000;
+  
+  -moz-border-radius-bottomleft:0px;
+  -webkit-border-bottom-left-radius:0px;
+  border-bottom-left-radius:0px;
+  
+  -moz-border-radius-bottomright:0px;
+  -webkit-border-bottom-right-radius:0px;
+  border-bottom-right-radius:0px;
+  
+  -moz-border-radius-topright:0px;
+  -webkit-border-top-right-radius:0px;
+  border-top-right-radius:0px;
+  
+  -moz-border-radius-topleft:0px;
+  -webkit-border-top-left-radius:0px;
+  border-top-left-radius:0px;
+}.leaderboard-tab table{
+    border-collapse: collapse;
+        border-spacing: 0;
+  width:100%;
+  height:100%;
+  margin:0px;padding:0px;
+}.leaderboard-tab tr:last-child td:last-child {
+  -moz-border-radius-bottomright:0px;
+  -webkit-border-bottom-right-radius:0px;
+  border-bottom-right-radius:0px;
+}
+.leaderboard-tab table tr:first-child td:first-child {
+  -moz-border-radius-topleft:0px;
+  -webkit-border-top-left-radius:0px;
+  border-top-left-radius:0px;
+}
+.leaderboard-tab table tr:first-child td:last-child {
+  -moz-border-radius-topright:0px;
+  -webkit-border-top-right-radius:0px;
+  border-top-right-radius:0px;
+}.leaderboard-tab tr:last-child td:first-child{
+  -moz-border-radius-bottomleft:0px;
+  -webkit-border-bottom-left-radius:0px;
+  border-bottom-left-radius:0px;
+}.leaderboard-tab tr:hover td{
+  
+}
+.leaderboard-tab tr:nth-child(odd){ background-color:#a0c8ef; }
+.leaderboard-tab tr:nth-child(even)    { background-color:#ffffff; }.leaderboard-tab td{
+  vertical-align:middle;
+  
+  
+  border:1px solid #000000;
+  border-width:0px 1px 1px 0px;
+  text-align:center;
+  padding:5px;
+  font-size:10px;
+  font-family:Helvetica;
+  font-weight:normal;
+  color:#000000;
+}.leaderboard-tab tr:last-child td{
+  border-width:0px 1px 0px 0px;
+}.leaderboard-tab tr td:last-child{
+  border-width:0px 0px 1px 0px;
+}.leaderboard-tab tr:last-child td:last-child{
+  border-width:0px 0px 0px 0px;
+}
+.leaderboard-tab tr:first-child td{
+    background:-o-linear-gradient(bottom, #3595f4 5%, #3595f4 100%);  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #3595f4), color-stop(1, #3595f4) );
+  background:-moz-linear-gradient( center top, #3595f4 5%, #3595f4 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#3595f4", endColorstr="#3595f4");  background: -o-linear-gradient(top,#3595f4,3595f4);
+
+  background-color:#3595f4;
+  border:0px solid #000000;
+  text-align:center;
+  border-width:0px 0px 1px 1px;
+  font-size:13px;
+  font-family:Helvetica;
+  font-weight:bold;
+  color:#ffffff;
+}
+.leaderboard-tab tr:first-child:hover td{
+  background:-o-linear-gradient(bottom, #3595f4 5%, #3595f4 100%);  background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #3595f4), color-stop(1, #3595f4) );
+  background:-moz-linear-gradient( center top, #3595f4 5%, #3595f4 100% );
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#3595f4", endColorstr="#3595f4");  background: -o-linear-gradient(top,#3595f4,3595f4);
+
+  background-color:#3595f4;
+}
+.leaderboard-tab tr:first-child td:first-child{
+  border-width:0px 0px 1px 0px;
+}
+.leaderboard-tab tr:first-child td:last-child{
+  border-width:0px 0px 1px 1px;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+/* ===== Initializr Styles ==================================================
+   Author: Jonathan Verrecchia - verekia.com/initializr/responsive-template
+   ========================================================================== */
+body {
+  font: 50px/1.5 'Raleway', Helvetica, Helvetica Neue, Arial, sans-serif;
+  background-color: #212121, margin: 0; }
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  margin: 0; }
+
+/* Make the body 100% of the browser viewport height */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0; }
+
+h1 {
+  font-size: 2em;
+  margin-top: 0;
+  font-family: 'Roboto Condensed', Helvetica, Helvetica Neue, Arial, sans-serif;
+  font-weight: 700; }
+
+
+  #advanture {
+    font-size: 40px;
+    height: 3px;
+    font-family: 'Roboto Condensed', Helvetica, Helvetica Neue, Arial, sans-serif;
+    opacity: 1;
+    margin: 0 0 0px 0;
+    max-width: 400px;
+    text-align: center; }
+
+
+.center {
+    margin: auto;
+    width: 50%;
+    padding: 100px;
+}
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+/* =Preloader */
+#preloader {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: #212121;
+  color: #ffffff; }
+  #preloader .txt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); }
+
+  #preloader .txt-perc {
+    font-size: 50px;
+    font-family: 'Roboto Condensed', Helvetica, Helvetica Neue, Arial, sans-serif;
+    opacity: 1;
+    margin: 0 0 6px 0;
+    max-width: 400px;
+    text-align: center; }
+  #preloader .progress {
+    width: 100px;
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 0 auto 15px auto; }
+    #preloader .progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.8); }
+  #preloader.is-hidden {
+    visibility: hidden;
+    overflow-y:hidden;
+    width: 100%;
+      height: 100%;
+    opacity: 0; }
+
+.is-loading {
+  overflow: hidden; }
+
+canvas {width: 100%;
+      height: 100%;
+      overflow-y:hidden;}
+
+
